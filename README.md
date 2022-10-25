@@ -1,8 +1,7 @@
-# 判例相関図
-裁判例検索で入手した判例のpdfからフィッシュボーン図を作成する研究です。  
+# 判例フィッシュボーン
+[裁判例検索](https://www.courts.go.jp/app/hanrei_jp/search1)で入手した判例のpdfからフィッシュボーン図を作成する研究です。  
 ## 環境
-- python 3.10.0 (32bit)
-- pdfminer
+- python 3.10.5 (32bit)
 - [MeCab 0.996](https://taku910.github.io/mecab/)
 - [Text Mining Studio](https://www.msi.co.jp/tmstudio/)
 ## 構成
