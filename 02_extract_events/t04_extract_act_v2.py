@@ -1,6 +1,7 @@
 """
 行動の抽出
-人物の文節に係る動詞を特定し、人物からその動詞までの文節を行動として抽出（改善が必要なら適宜修正）
+人物から文末、時間表現もしくは人物の文節までの動詞を抽出
+そこから人物に関連した時間表現の文節を排除
 """
 import glob
 from operator import is_
@@ -25,27 +26,37 @@ def extract_from_text(text):
         ) for bnst in text["bunsetsu"]]
     events:List[Event]=[Event(
             event["id"],
-            event["bunsetsu"],
+            event["time"]["bnst_id"],
             event["time"]["text"],
             event["time"]["value"],
             event["person"]["bnst_id"],
             event["person"]["text"],
         )for event in text["events"]]
+    time_bnsts=[event["time"]["bnst_id"] for event in text["events"]]
+    person_bnsts=[event["person"]["bnst_id"] for event in text["events"]]
+
     for event in events:
         if event.person_id==-1:continue
         act_id=bnsts[event.person_id].parent_id
-        event.act_ids=[
-            id for id in range(event.person_id,act_id) if id != event.person_id and id != event.bnst-1
-        ]
-        
+        event.act_ids=[]
+        for bnst in range(event.time_id,len(bnsts)):
+            bnst=bnst+1
+            #print(bnst)
+            if bnst in time_bnsts:
+                if bnst!=event.time_id:break
+                else:continue
+            if bnst in person_bnsts:
+                if bnst!=event.person_id:break
+                else:continue
+            event.act_ids.append(bnst-1)
         event.act_texts=[
             bnsts[id].text for id in event.act_ids
         ]
     return events
 
 def main():
-    os.makedirs("03", exist_ok=True)
-    files = glob.glob("./02/*.json")
+    os.makedirs("04", exist_ok=True)
+    files = glob.glob("./03/*.json")
     for file in files:
         print(file)
         output_path=os.path.splitext(os.path.basename(file))[0]
@@ -61,8 +72,8 @@ def main():
                     dat["events"]=[
                         {
                             "id":event.id,
-                            "bunsetsu":event.bnst,
                             "time":{
+                                "bnst_id":event.time_id,
                                 "text":event.time_text,
                                 "value":event.time_value
                             },
@@ -71,12 +82,12 @@ def main():
                                 "bnst_id":event.person_id
                             },
                             "act":{
-                                "ids":event.act_ids,
+                                "bnst_ids":event.act_ids,
                                 "texts":event.act_texts
                             }
                         } for event in events
                     ]
-        export_to_json(f"./03/{output_path}.json",data)
+        export_to_json(f"./04/{output_path}.json",data)
         
 if __name__=="__main__":
     main()

@@ -27,7 +27,7 @@ def extract_person(bnsts:List[Bunsetsu],rules:List[Rule])->List[int]:
     for bnst in bnsts:
         for rule in rules:
             if bnst.match_rule(rule):
-                res.append(bnst.id-1)
+                res.append(bnst.id)
     return res
 
 def extract_from_text(rules,text):
@@ -41,21 +41,21 @@ def extract_from_text(rules,text):
         ) for bnst in text["bunsetsu"]]
     events:List[Event]=[Event(
             event["id"],
-            event["bunsetsu"],
+            event["time"]["bnst_id"],
             event["time"]["text"],
             event["time"]["value"]
         )for event in text["events"]]
     sentence =Sentence(bnsts,events)
     sentence_graph=sentence.get_graph()
     person=extract_person(bnsts,rules)
-    print(person)
+    #print(person)
     for event in events:
-        lst=DFS(event.bnst-1,sentence_graph)
+        lst=DFS(event.time_id-1,sentence_graph)
         min_val=10000000
         min_id=-1
         for p in person:
             j=bnsts[p].get_joshi()
-            print(bnsts[p].mrph,j,lst[p])
+            #print(bnsts[p].mrph,j,lst[p])
             if j=="が" or j=="は":
                 if min_val>lst[p]:
                     min_val=lst[p]
@@ -67,8 +67,8 @@ def extract_from_text(rules,text):
 
 
 def main():
-    os.makedirs("02", exist_ok=True)
-    files = glob.glob("./01/*.json")
+    os.makedirs("03", exist_ok=True)
+    files = glob.glob("./02/*.json")
     rules=load_rules("./rules/rule_easy.json")
     for file in files:
         print(file)
@@ -76,15 +76,15 @@ def main():
         data=json.load(data)
         contents =data["contents"]
         for content in contents:
-            if len(content["texts"])>0:
-                print(content["texts"][0])
+            #if len(content["texts"])>0:
+            #    print(content["texts"][0])
             for dat in content["datas"]:
                 events=extract_from_text(rules,dat)
                 dat["events"]=[
                     {
                         "id":event.id,
-                        "bunsetsu":event.bnst,
                         "time":{
+                            "bnst_id":event.time_id,
                             "text":event.time_text,
                             "value":event.time_value
                         },
@@ -95,7 +95,7 @@ def main():
                     } for event in events
                 ]
         output_path=os.path.splitext(os.path.basename(file))[0]
-        export_to_json(f"./02/{output_path}.json",data)
+        export_to_json(f"./03/{output_path}.json",data)
 
 if __name__=="__main__":
     main()

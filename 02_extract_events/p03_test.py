@@ -7,8 +7,6 @@ from value.bunsetsu import Bunsetsu
 from value.event import Event
 from typing import List, Tuple, Dict, Set,Optional
 
-os.makedirs("p03", exist_ok=True)
-files = glob.glob("./03/*.json")
 
 def to_txt(file:str):
     output_path=os.path.splitext(os.path.basename(file))[0]
@@ -70,6 +68,9 @@ def to_csv(file:str):
         writer = csv.writer(f)
         for d in res:
             writer.writerow(d)
+            
+os.makedirs("p03", exist_ok=True)
+files = glob.glob("./03/*.json")
 for file in files:
     print(file)
     to_csv(file)

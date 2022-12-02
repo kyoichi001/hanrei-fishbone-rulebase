@@ -173,8 +173,8 @@ def extract_time(text:str,befTime:Time)->Optional[Time]:
     return None
     
 def main():
-    os.makedirs("01", exist_ok=True)
-    files = glob.glob("./00/*.json")
+    os.makedirs("02", exist_ok=True)
+    files = glob.glob("./01/*.json")
     for file in files:
         print(file)
         output_path=os.path.splitext(os.path.basename(file))[0]
@@ -192,18 +192,18 @@ def main():
                             befTime=t
                             events.append({
                                 "id":index,
-                                "bunsetsu":bunsetsu["id"],
                                 "time":{
+                                    "bnst_id":bunsetsu["id"],
                                     "text":bunsetsu["text"],
                                     "value":t.value()
                                 }
                             })
                             index+=1
                     dat["events"]=events
-                    if len(events)!=0:
-                        print(events)
+                    #if len(events)!=0:
+                    #    print(events)
                     index=0
-        export_to_json(f"./01/{output_path}.json",data)
+        export_to_json(f"./02/{output_path}.json",data)
 
 if __name__=="__main__":
     main()

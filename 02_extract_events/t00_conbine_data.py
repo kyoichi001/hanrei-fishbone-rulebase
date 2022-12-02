@@ -31,7 +31,6 @@ def load_csv(filepath:str):
             "bunsetsu":[]
         }
         prev_row_id=1
-        prev_text_id=1
         for row in reader:
             row_id=int(row[1])
             text_id=int(row[2])
@@ -43,15 +42,14 @@ def load_csv(filepath:str):
                     "bunsetsu":[]
                 }
             text_obj["bunsetsu"].append({
-                "id":int(row[3]),
+                "id":int(row[3])-1,
                 "text":row[4],
                 "mrph":row[5],
                 "type":row[7],
                 "type2":row[8],
-                "parent":int(row[9])
+                "parent":max(int(row[9])-1,-1)
             })
             prev_row_id=row_id
-            prev_text_id=text_id
         res["texts"].append(text_obj)
     return res
     #with open("./00/"+output_path+"_test.json", 'w', encoding='utf8', newline='') as f:
@@ -71,7 +69,7 @@ def conbine_to_json(filepath:str,csv_data):
                 content["datas"].append(csv_data[output_path]["texts"][index])
                 index+=1
     with open("./00/"+output_path+".json", 'w', encoding='utf8', newline='') as f:
-        print("saving "+filepath)
+        print("./00/"+output_path+".json")
         json.dump(data, f, ensure_ascii=False, indent=2)
 
 def main():
