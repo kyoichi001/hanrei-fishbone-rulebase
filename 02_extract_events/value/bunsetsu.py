@@ -12,6 +12,7 @@ class Bunsetsu:
         self.parent_id=parent_id
         self.type1=type1
         self.type2=type2
+        self.is_rentaishi=False
     def get_joshi(self)->str:
         """
         助詞を返す
