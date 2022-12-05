@@ -1,5 +1,6 @@
 """
-KNPの結果から、時間表現に当てはまる文節のidのリストを出力
+マークされた時間表現の文節から、出来事の文節に当てはまるものを抽出
+付随する文節をもとに、時間表現のタイプを決定する
 """
 
 import glob
@@ -36,9 +37,9 @@ def extract_time_1(s:str,befTime:Time)->Time|None:
             return Time(1988+year,month,day)
         elif c[0]=="昭和":
             return Time(1925+year,month,day)
-    else:
         return None
-def extract_time_2(s:str,befTime:Time):
+    return None
+def extract_time_2(s:str,befTime:Time)->Time|None:
     """
     年号XX年XX月から抽出
     """
@@ -60,10 +61,10 @@ def extract_time_2(s:str,befTime:Time):
             return Time(1988+year,month,0)
         elif c[0]=="昭和":
             return Time(1925+year,month,0)
-    else:
         return None
+    return None
 
-def extract_time_3(s:str,befTime:Time):
+def extract_time_3(s:str,befTime:Time)->Time|None:
     """
     年号XX年から抽出
     """
@@ -83,10 +84,9 @@ def extract_time_3(s:str,befTime:Time):
             return Time(1988+year,0,0)
         elif c[0]=="昭和":
             return Time(1925+year,0,0)
-    else:
-        return None
+    return None
 
-def extract_time_4(s:str,befTime:Time):
+def extract_time_4(s:str,befTime:Time)->Time|None:
     """
     同年XX月XX日から抽出
     """
@@ -95,9 +95,8 @@ def extract_time_4(s:str,befTime:Time):
         b=re.findall(r'\d+',s)
         year,month,day=befTime.year,int(b[0]),int(b[1])
         return Time(year,month,day)
-    else:
-        return None
-def extract_time_5(s:str,befTime:Time):
+    return None
+def extract_time_5(s:str,befTime:Time)->Time|None:
     """
     同年XX月XX日から抽出
     """
@@ -106,9 +105,8 @@ def extract_time_5(s:str,befTime:Time):
         b=re.findall(r'\d+',s)
         year,month=befTime.year,int(b[0])
         return Time(year,month,0)
-    else:
-        return None
-def extract_time_6(s:str,befTime:Time):
+    return None
+def extract_time_6(s:str,befTime:Time)->Time|None:
     """
     同年XX月XX日から抽出
     """
@@ -116,9 +114,8 @@ def extract_time_6(s:str,befTime:Time):
     if a is not None:
         year=befTime.year
         return Time(year,0,0)
-    else:
-        return None
-def extract_time_7(s:str,befTime:Time):
+    return None
+def extract_time_7(s:str,befTime:Time)->Time|None:
     """
     同月XX日から抽出
     """
@@ -127,9 +124,8 @@ def extract_time_7(s:str,befTime:Time):
         b=re.findall(r'\d+',s)
         year,month,day=befTime.year,befTime.month,int(b[0])
         return Time(year,month,day)
-    else:
-        return None
-def extract_time_8(s:str,befTime:Time):
+    return None
+def extract_time_8(s:str,befTime:Time)->Time|None:
     """
     同月XX日から抽出
     """
@@ -137,9 +133,8 @@ def extract_time_8(s:str,befTime:Time):
     if a is not None:
         year,month=befTime.year,befTime.month
         return Time(year,month,0)
-    else:
-        return None
-def extract_time_9(s:str,befTime:Time):
+    return None
+def extract_time_9(s:str,befTime:Time)->Time|None:
     """
     同日から抽出
     """
@@ -147,8 +142,7 @@ def extract_time_9(s:str,befTime:Time):
     if a is not None:
         year,month,day=befTime.year,befTime.month,befTime.day
         return Time(year,month,day)
-    else:
-        return None
+    return None
 
 def export_to_json(filepath,data):
     with open(filepath, 'w', encoding='utf8', newline='') as f:

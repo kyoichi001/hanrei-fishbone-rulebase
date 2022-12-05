@@ -46,15 +46,14 @@ def check_rentaishi(bnsts:List[Bunsetsu])->List[bool]:
     return flagList
 
 def main():
-    os.makedirs("01", exist_ok=True)
-    files = glob.glob("./00/*.json")
+    os.makedirs("02", exist_ok=True)
+    files = glob.glob("./01/*.json")
     for file in files:
         print(file)
         data = open(file, "r", encoding="utf-8")
         data=json.load(data)
         for content in data["contents"]:
             for d in content["datas"]:
-                #print([bnst["text"] for bnst in d["bunsetsu"]])
                 bnsts:List[Bunsetsu]=[Bunsetsu(
                         bnst["id"],
                         bnst["text"],
@@ -64,17 +63,10 @@ def main():
                         bnst["type2"]
                     ) for bnst in d["bunsetsu"]]
                 b=check_rentaishi(bnsts)
-                d["bunsetsu"]=[{
-                        "id": bnst["id"],
-                        "text": bnst["text"],
-                        "mrph": bnst["mrph"],
-                        "type": bnst["type"],
-                        "type2": bnst["type2"],
-                        "parent": bnst["parent"],
-                        "is_rentaishi":b[bnst["id"]]
-                    } for bnst in d["bunsetsu"]]
+                for bunsetsu in d["bunsetsu"]:
+                    bunsetsu["is_rentaishi"]=b[bunsetsu["id"]]
         output_path=os.path.splitext(os.path.basename(file))[0]
-        export_to_json(f"./01/{output_path}.json",data)
+        export_to_json(f"./02/{output_path}.json",data)
 
 if __name__=="__main__":
     main()

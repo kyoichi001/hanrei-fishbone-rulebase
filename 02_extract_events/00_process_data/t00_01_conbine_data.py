@@ -68,8 +68,8 @@ def conbine_to_json(filepath:str,csv_data):
             for i in range(count):
                 content["datas"].append(csv_data[output_path]["texts"][index])
                 index+=1
-    with open("./00/"+output_path+".json", 'w', encoding='utf8', newline='') as f:
-        print("./00/"+output_path+".json")
+    with open("./01/"+output_path+".json", 'w', encoding='utf8', newline='') as f:
+        print("./01/"+output_path+".json")
         json.dump(data, f, ensure_ascii=False, indent=2)
 
 def main():
