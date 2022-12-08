@@ -55,7 +55,7 @@ def load_csv(filepath:str):
     #with open("./00/"+output_path+"_test.json", 'w', encoding='utf8', newline='') as f:
     #    json.dump(csv_data[output_path], f, ensure_ascii=False, indent=2)
 
-def conbine_to_json(filepath:str,csv_data):
+def conbine_to_json(outputDir:str,filepath:str,csv_data):
     output_path=os.path.splitext(os.path.basename(filepath))[0]
     data={}
     with open(filepath,encoding="utf-8") as f:
@@ -68,20 +68,20 @@ def conbine_to_json(filepath:str,csv_data):
             for i in range(count):
                 content["datas"].append(csv_data[output_path]["texts"][index])
                 index+=1
-    with open("./01/"+output_path+".json", 'w', encoding='utf8', newline='') as f:
-        print("./01/"+output_path+".json")
+    with open(f"{outputDir}/{output_path}.json", 'w', encoding='utf8', newline='') as f:
+        print(f"{outputDir}/{output_path}.json")
         json.dump(data, f, ensure_ascii=False, indent=2)
 
-def main():
-    os.makedirs("00", exist_ok=True)
-    csv_files = glob.glob("./data/*.csv")
+def main(inputDir:str,outputDir:str):
+    os.makedirs(outputDir, exist_ok=True)
+    csv_files = glob.glob(f"{inputDir}/*.csv")
     csv_data={}
     for file in csv_files:
         output_path=os.path.splitext(os.path.basename(file))[0]
         csv_data[output_path]=load_csv(file)
-    json_files = glob.glob("./data/*.json")
+    json_files = glob.glob(f"{inputDir}/*.json")
     for file in json_files:
-        conbine_to_json(file,csv_data)
+        conbine_to_json(outputDir,file,csv_data)
 
 if __name__=="__main__":
-    main()
+    main("./data","./01")

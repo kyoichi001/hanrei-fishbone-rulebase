@@ -15,7 +15,7 @@ def is_meishi(bst):
     文節の中にある単語が名詞・接頭詞のみか
     """
     for tango in bst["tangos"]:
-        if not (tango["type1"]=="名詞" or tango["type1"]=="接頭詞" ):
+        if not ((tango["type1"]=="名詞" or tango["type1"]=="接頭詞")and tango["type2"]!="非自立" ):
             return False
     return True
 
@@ -60,9 +60,9 @@ def export_to_json(filepath,data):
     with open(filepath, 'w', encoding='utf8', newline='') as f:
         json.dump(data, f, ensure_ascii=False, indent=2)
 
-def main():
-    os.makedirs("02", exist_ok=True)
-    json_files = glob.glob("./fishbone_out/*.json")
+def main(inputDir:str,outputDir:str):
+    os.makedirs(outputDir, exist_ok=True)
+    json_files = glob.glob(f"{inputDir}/*.json")
     for file in json_files:
         print(file)
         data={}
@@ -73,7 +73,7 @@ def main():
                     newBsts=conbine_bunsetsu(dat["bunsetsu"])
                     dat["bunsetsu"]=newBsts
         output_path=os.path.splitext(os.path.basename(file))[0]
-        export_to_json(f"./02/{output_path}.json",data)
+        export_to_json(f"{outputDir}/{output_path}.json",data)
 
 if __name__=="__main__":
-    main()
+    main("./fishbone_out","./02")
