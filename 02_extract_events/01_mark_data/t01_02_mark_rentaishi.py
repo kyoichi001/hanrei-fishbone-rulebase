@@ -12,10 +12,10 @@ from operator import is_
 import os
 import json
 from re import T
-from value.bunsetsu import Bunsetsu, Tango
 from typing import List, Tuple, Dict, Set,Optional
-from value.graph import Graph
-from value.graph import Graph
+from ..value.bunsetsu import Bunsetsu, Tango
+from ..value.graph import Graph
+from ..value.graph import Graph
 
 def is_meishi(bunsetsu:Bunsetsu):
     for tango in bunsetsu.tangos:

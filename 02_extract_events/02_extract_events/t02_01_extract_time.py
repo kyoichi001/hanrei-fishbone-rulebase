@@ -9,14 +9,14 @@ import os
 import json
 import re
 import csv
-from value.time import Time
+from ..value.time import Time
 from typing import Optional
 
 def export_to_json(filepath,data):
     with open(filepath, 'w', encoding='utf8', newline='') as f:
         json.dump(data, f, ensure_ascii=False, indent=2)
 
-def main():
+def main(inputDir:str,outputDir:str):
     os.makedirs("02", exist_ok=True)
     files = glob.glob("./01/*.json")
     for file in files:

@@ -7,13 +7,12 @@ from operator import is_
 import os
 import json
 from re import T
-from value.sentence import Sentence
-from value.bunsetsu import Bunsetsu
-from value.event import Event
 from typing import List, Tuple, Dict, Set,Optional
-from value.graph import Graph
+from ..value.bunsetsu import Bunsetsu,Sentence
+from ..value.event import Event
+from ..value.graph import Graph
 from rules.rule_loader import Rule,load_rules
-from lib.dfs import DFS
+from ..lib.dfs import DFS
 
 def export_to_json(filename:str,data)->None:
     with open(filename, 'w', encoding='utf8', newline='') as f:
@@ -66,7 +65,7 @@ def extract_from_text(rules,text):
     return events
 
 
-def main():
+def main(inputDir:str,outputDir:str):
     os.makedirs("03", exist_ok=True)
     files = glob.glob("./02/*.json")
     rules=load_rules("./rules/rule_easy.json")

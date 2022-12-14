@@ -1,25 +1,92 @@
-from rules.rule_loader import Rule
+
+from typing import List, Tuple, Dict, Set, Any
 import re
+from event import Event
+from graph import Graph
+from typing import List, Tuple, Dict, Set,Optional
+
+class TimeAttribute:
+    def __init__(self,text:str,value:int):
+        self.text=text
+        self.value=value
+class PersonAttribute:
+    def __init__(self,content:str):
+        self.content=content
+class ReplaceSelif:
+    """
+    本文にある「セリフ」を置き換えるためのデータ
+    """
+    def __init__(self,target_selif:int,content:str,target_text_id:int,text_id:int) -> None:
+          self.target_selif=target_selif # そのテキストの何番目の「セリフ」か
+          self.content=content
+          self.target_text_id=target_text_id
+          self.text_id=text_id
+class ReplaceBlacket:
+    """
+    本文にある（）を挿入するためのデータ
+    """
+    def __init__(self,position:int,content:str,target_text_id:int,text_id:int) -> None:
+          self.position=position
+          self.content=content
+          self.target_text_id=target_text_id
+          self.text_id=text_id
+class Text:
+    def __init__(self,text_id:int,text:int) -> None:
+        self.text_id=text_id
+        self.text=text
+
+class Tango:
+    """
+    単語
+    """
+    def __init__(self,content,type1,type2,type3):
+        self.content=content
+        self.type1=type1
+        self.type2=type2
+        self.type3=type3
 
 class Bunsetsu:
     """
     文節
     """
-    def __init__(self,id:int,text:str,mrph:str,parent_id:int,type1:str,type2:str) -> None:
+    def __init__(self,id:int,to:int,tangos:List[Tango],is_rentaishi=False,time:TimeAttribute=None,person:PersonAttribute=None) -> None:
         self.id=id
-        self.text=text # 文節の内容
-        self.mrph=mrph # 原型（助詞助動詞なし）
-        self.parent_id=parent_id
-        self.type1=type1
-        self.type2=type2
-        self.is_rentaishi=False
-    def get_joshi(self)->str:
+        self.to=to
+        self.tangos=tangos
+        self.is_rentaishi=is_rentaishi
+        self.time=time
+        self.person=person
+
+class Sentence:
+    """
+    文についてのクラス（文節のリスト）
+    """
+    def __init__(self,text_id:int,bnsts:List[Bunsetsu],events:Optional[List[Event]]) -> None:
+        self.text_id=text_id
+        self.bnsts=bnsts
+        self.events=events
+    def get_graph(self)->Graph:
         """
-        助詞を返す
+        文節のグラフを返す
         """
-        return self.text.replace(self.mrph, '').replace("、","").replace("，","").replace("。","").replace("．","")
-    def match_rule(self,rule:Rule)->bool:
-        if rule.types=="c": return self.mrph==rule.content #テキストを直接指定
-        if rule.types=="type":return self.type1==rule.content #品詞
-        if rule.types=="regex": return re.fullmatch(rule.content,self.mrph) is not None #正規表現
-        return True
+        res=[[] for i in self.bnsts]
+        for bnst in self.bnsts:
+            if bnst.parent_id==-1:
+                continue
+            else:
+                res[bnst.id-1].append(bnst.parent_id-1)
+                res[bnst.parent_id-1].append(bnst.id-1)
+        return Graph(res)
+
+
+class HanreiContents:
+    """
+    jsonのcontentsの型定義
+    """
+    def __init__(self,type:str,header:str,texts:List[Text],selifs:Optional[List[ReplaceSelif]],blackets:Optional[List[ReplaceBlacket]],datas:List[Sentence]):
+      self.type
+      self.header
+      self.texts
+      self.selifs
+      self.blackets
+      self.datas

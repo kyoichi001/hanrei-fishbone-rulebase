@@ -54,7 +54,7 @@ def extract_from_text(text):
         ]
     return events
 
-def main():
+def main(inputDir:str,outputDir:str):
     os.makedirs("04", exist_ok=True)
     files = glob.glob("./03/*.json")
     for file in files:

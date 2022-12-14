@@ -6,14 +6,13 @@ import glob
 from operator import is_
 import os
 import json
-from re import T
-from value.sentence import Sentence
-from value.bunsetsu import Bunsetsu,Tango
-from value.event import Event
-from typing import List, Tuple, Dict, Set,Optional
-from value.graph import Graph
-from rules.rule_loader import Rule,load_rules
 import re
+from re import T
+from typing import List, Tuple, Dict, Set,Optional
+from ..value.bunsetsu import Bunsetsu,Tango,Sentence
+from ..value.event import Event
+from ..value.graph import Graph
+from rules.rule_loader import Rule,load_rules
 
 def match_rule(tango:Tango,rule:Rule)->bool:
     if rule.types=="c": return tango.content==rule.content #テキストを直接指定

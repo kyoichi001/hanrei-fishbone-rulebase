@@ -8,7 +8,7 @@ import os
 import json
 import re
 import csv
-from value.time import Time
+from ..value.time import Time
 from typing import Optional
 from typing import List, Tuple, Dict, Set, Any
 
