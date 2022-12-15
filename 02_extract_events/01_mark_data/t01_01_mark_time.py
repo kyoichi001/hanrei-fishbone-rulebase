@@ -12,6 +12,31 @@ from value.time import Time
 from typing import Optional
 from typing import List, Tuple, Dict, Set, Any
 
+def extract_time_(rule,s:str,befTime:Time)->Tuple[Time,str]|None:
+    regex=rule["regex"]
+    value=rule["value"]
+    same=rule.get("same")
+    res=Time()
+    a= re.search(regex,s)
+    if a is not None:
+        for i,v in enumerate(value):
+            if v=="gengo":
+                if a.group(i)=="昭和":res.year+=1925
+                elif a.group(i)=="平成":res.year+=1988
+                elif a.group(i)=="令和":res.year+=2018
+            elif v=="year":
+                res.year+=int(a.group(i))
+            elif v=="month":
+                res.month=int(a.group(i))
+            elif v=="day":
+                res.day=int(a.group(i))
+        if same is not None:
+            if same=="year":res.year=befTime.year
+            elif same=="month":res.month=befTime.month
+            elif same=="day":res.day=befTime.day
+        return res, a.group()
+    return None
+
 def extract_time_1(s:str,befTime:Time)->Tuple[Time,str]|None:
     """
     年号XX年XX月XX日から抽出
