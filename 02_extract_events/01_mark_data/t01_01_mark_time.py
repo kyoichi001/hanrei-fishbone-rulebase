@@ -8,7 +8,7 @@ import os
 import json
 import re
 import csv
-from ..value.time import Time
+from value.time import Time
 from typing import Optional
 from typing import List, Tuple, Dict, Set, Any
 
@@ -16,8 +16,9 @@ def extract_time_1(s:str,befTime:Time)->Tuple[Time,str]|None:
     """
     年号XX年XX月XX日から抽出
     """
-    a= re.search(r'(昭和|平成|令和)((\d+年)|(元年))\d+月\d+日',s)
+    a= re.search('(昭和|平成|令和)(\\d+|元)年(\\d+)月(\\d+)日',s)
     if a is not None:
+        print(a.groups())
         b=re.findall(r'\d+',s)
         c=re.findall(r'(昭和|平成|令和)',s)
         d=re.findall(r'元年',s)
@@ -90,8 +91,9 @@ def extract_time_4(s:str,befTime:Time)->Tuple[Time,str]|None:
     """
     同年XX月XX日から抽出
     """
-    a= re.search(r'同年\d+月\d+日',s)
+    a= re.search(r'(同年)(\d+月)(\d+日)',s)
     if a is not None:
+        print(a.groups())
         b=re.findall(r'\d+',s)
         year,month,day=befTime.year,int(b[0]),int(b[1])
         return Time(year,month,day),a.group()

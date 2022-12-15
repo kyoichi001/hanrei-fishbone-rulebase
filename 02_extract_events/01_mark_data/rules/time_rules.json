@@ -1,0 +1,74 @@
+{
+    "point": [
+        {
+            "regex": "(昭和|平成|令和)(\\d+|元)年(\\d+)月(\\d+)日",
+            "value": [
+                "gengo",
+                "year",
+                "month",
+                "day"
+            ]
+        },
+        {
+            "regex": "(昭和|平成|令和)(\\d+|元)年(\\d+)月",
+            "value": [
+                "gengo",
+                "year",
+                "month"
+            ]
+        },
+        {
+            "regex": "(昭和|平成|令和)(\\d+|元)年",
+            "value": [
+                "gengo",
+                "year"
+            ]
+        },
+        {
+            "regex": "同年(\\d+)月(\\d+)日",
+            "value": [
+                "month",
+                "day"
+            ],
+            "same": "year"
+        },
+        {
+            "regex": "同年(\\d+)月",
+            "value": [
+                "month"
+            ],
+            "same": "year"
+        },
+        {
+            "regex": "同年",
+            "value": [],
+            "same": "year"
+        },
+        {
+            "regex": "同月(\\d+)日",
+            "value": [
+                "day"
+            ],
+            "same": "month"
+        },
+        {
+            "regex": "同月",
+            "value": [],
+            "same": "month"
+        },
+        {
+            "regex": "同日",
+            "value": [],
+            "same": "day"
+        }
+    ],
+    "begin": [
+        "から"
+    ],
+    "end": [
+        "まで"
+    ],
+    "other": [
+        "間"
+    ]
+}
