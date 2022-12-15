@@ -8,67 +8,32 @@ import os
 import json
 from re import T
 from typing import List, Tuple, Dict, Set,Optional
-from ..value.bunsetsu import Bunsetsu,Sentence
-from ..value.event import Event
-from ..value.graph import Graph
-from rules.rule_loader import Rule,load_rules
-from ..lib.dfs import DFS
 
 def export_to_json(filename:str,data)->None:
     with open(filename, 'w', encoding='utf8', newline='') as f:
         json.dump(data, f, ensure_ascii=False, indent=2)
-
-def extract_person(bnsts:List[Bunsetsu],rules:List[Rule])->List[int]:
+def extract_main_people(dat):
     """
-    パターンに合うものを抽出
+    文から主語を抜き取る
+    bnstについて、personがNoneでなく、その助詞が「が」「は」「も」であり、is_rentaishiがfalse
     """
     res=[]
-    for bnst in bnsts:
-        for rule in rules:
-            if bnst.match_rule(rule):
-                res.append(bnst.id)
+    for bnst in dat["bunsetsu"]:
+        if not bnst["is_rentaishi"] and bnst.get("person") is not None:
+            for tango in bnst["tangos"]:
+                if tango["content"] in ["は","が","も"] and tango["type1"]=="助詞":
+                    res.append({
+                        "id":bnst["id"],
+                        "person":bnst["person"]["content"],
+                        "joshi":tango["content"]
+                    })
+                    break #単語の精査を終了し、次の文節へ
     return res
-
-def extract_from_text(rules,text):
-    bnsts:List[Bunsetsu]=[Bunsetsu(
-            bnst["id"],
-            bnst["text"],
-            bnst["mrph"],
-            bnst["parent"],
-            bnst["type"],
-            bnst["type2"]
-        ) for bnst in text["bunsetsu"]]
-    events:List[Event]=[Event(
-            event["id"],
-            event["time"]["bnst_id"],
-            event["time"]["text"],
-            event["time"]["value"]
-        )for event in text["events"]]
-    sentence =Sentence(bnsts,events)
-    sentence_graph=sentence.get_graph()
-    person=extract_person(bnsts,rules)
-    #print(person)
-    for event in events:
-        lst=DFS(event.time_id-1,sentence_graph)
-        min_val=10000000
-        min_id=-1
-        for p in person:
-            j=bnsts[p].get_joshi()
-            #print(bnsts[p].mrph,j,lst[p])
-            if j=="が" or j=="は":
-                if min_val>lst[p]:
-                    min_val=lst[p]
-                    min_id=p
-        if min_id!=-1:
-            event.person_id=min_id
-            event.person_text=bnsts[min_id].text
-    return events
 
 
 def main(inputDir:str,outputDir:str):
-    os.makedirs("03", exist_ok=True)
-    files = glob.glob("./02/*.json")
-    rules=load_rules("./rules/rule_easy.json")
+    os.makedirs(outputDir, exist_ok=True)
+    files = glob.glob(f"{inputDir}/*.json")
     for file in files:
         print(file)
         data = open(file, "r", encoding="utf-8")
@@ -78,23 +43,16 @@ def main(inputDir:str,outputDir:str):
             #if len(content["texts"])>0:
             #    print(content["texts"][0])
             for dat in content["datas"]:
-                events=extract_from_text(rules,dat)
-                dat["events"]=[
-                    {
-                        "id":event.id,
-                        "time":{
-                            "bnst_id":event.time_id,
-                            "text":event.time_text,
-                            "value":event.time_value
-                        },
-                        "person":{
-                            "text":event.person_text,
-                            "bnst_id":event.person_id
+                people=extract_main_people(dat)
+                if len(people)!=0:
+                    if dat.get("event") is not None:
+                        dat["event"]["people"]=people
+                    else:
+                        dat["event"]={
+                            "people":people
                         }
-                    } for event in events
-                ]
         output_path=os.path.splitext(os.path.basename(file))[0]
-        export_to_json(f"./03/{output_path}.json",data)
+        export_to_json(f"{outputDir}/{output_path}.json",data)
 
 if __name__=="__main__":
-    main()
+    main("./01","./02")
