@@ -18,158 +18,28 @@ def extract_time_(rule,s:str,befTime:Time)->Tuple[Time,str]|None:
     same=rule.get("same")
     res=Time()
     a= re.search(regex,s)
-    if a is not None:
-        for i,v in enumerate(value):
-            if v=="gengo":
-                if a.group(i)=="昭和":res.year+=1925
-                elif a.group(i)=="平成":res.year+=1988
-                elif a.group(i)=="令和":res.year+=2018
-            elif v=="year":
-                res.year+=int(a.group(i))
-            elif v=="month":
-                res.month=int(a.group(i))
-            elif v=="day":
-                res.day=int(a.group(i))
-        if same is not None:
-            if same=="year":res.year=befTime.year
-            elif same=="month":res.month=befTime.month
-            elif same=="day":res.day=befTime.day
-        return res, a.group()
-    return None
-
-def extract_time_1(s:str,befTime:Time)->Tuple[Time,str]|None:
-    """
-    年号XX年XX月XX日から抽出
-    """
-    a= re.search('(昭和|平成|令和)(\\d+|元)年(\\d+)月(\\d+)日',s)
-    if a is not None:
-        print(a.groups())
-        b=re.findall(r'\d+',s)
-        c=re.findall(r'(昭和|平成|令和)',s)
-        d=re.findall(r'元年',s)
-      #  print(s,c,d,b)
-        year,month,day=0,0,0
-        if len(d)!=0:
-            year=1
-            month=int(b[0])
-            day=int(b[1])
-        else:
-            year=int(b[0])
-            month=int(b[1])
-            day=int(b[2])
-        if c[0]=="令和":
-            return Time(2018+year,month,day), a.group()
-        elif c[0]=="平成":
-            return Time(1988+year,month,day), a.group()
-        elif c[0]=="昭和":
-            return Time(1925+year,month,day), a.group()
-        return None
-    return None
-def extract_time_2(s:str,befTime:Time)->Tuple[Time,str]|None:
-    """
-    年号XX年XX月から抽出
-    """
-    a= re.search(r'(昭和|平成|令和)((\d+年)|(元年))\d+月',s)
-    if a is not None:
-        b=re.findall(r'\d+',s)
-        c=re.findall(r'(昭和|平成|令和)',s)
-        d=re.findall(r'元年',s)
-        year,month=0,0
-        if len(d)!=0:
-            year=1
-            month=int(b[0])
-        else:
-            year=int(b[0])
-            month=int(b[1])
-        if c[0]=="令和":
-            return Time(2018+year,month,0),a.group()
-        elif c[0]=="平成":
-            return Time(1988+year,month,0),a.group()
-        elif c[0]=="昭和":
-            return Time(1925+year,month,0),a.group()
-        return None
-    return None
-
-def extract_time_3(s:str,befTime:Time)->Tuple[Time,str]|None:
-    """
-    年号XX年から抽出
-    """
-    a= re.search(r'(昭和|平成|令和)((\d+年)|(元年))',s)
-    if a is not None:
-        b=re.findall(r'\d+',s)
-        c=re.findall(r'(昭和|平成|令和)',s)
-        d=re.findall(r'元年',s)
-        year=0
-        if len(d)!=0:
-            year=1
-        else:
-            year=int(b[0])
-        if c[0]=="令和":
-            return Time(2018+year,0,0),a.group()
-        elif c[0]=="平成":
-            return Time(1988+year,0,0),a.group()
-        elif c[0]=="昭和":
-            return Time(1925+year,0,0),a.group()
-    return None
-
-def extract_time_4(s:str,befTime:Time)->Tuple[Time,str]|None:
-    """
-    同年XX月XX日から抽出
-    """
-    a= re.search(r'(同年)(\d+月)(\d+日)',s)
-    if a is not None:
-        print(a.groups())
-        b=re.findall(r'\d+',s)
-        year,month,day=befTime.year,int(b[0]),int(b[1])
-        return Time(year,month,day),a.group()
-    return None
-def extract_time_5(s:str,befTime:Time)->Tuple[Time,str]|None:
-    """
-    同年XX月XX日から抽出
-    """
-    a=  re.search(r'同年\d+月',s)
-    if a is not None:
-        b=re.findall(r'\d+',s)
-        year,month=befTime.year,int(b[0])
-        return Time(year,month,0),a.group()
-    return None
-def extract_time_6(s:str,befTime:Time)->Tuple[Time,str]|None:
-    """
-    同年XX月XX日から抽出
-    """
-    a=  re.search(r'同年',s)
-    if a is not None:
-        year=befTime.year
-        return Time(year,0,0),a.group()
-    return None
-def extract_time_7(s:str,befTime:Time)->Tuple[Time,str]|None:
-    """
-    同月XX日から抽出
-    """
-    a=  re.search(r'同月\d+日',s)
-    if a is not None:
-        b=re.findall(r'\d+',s)
-        year,month,day=befTime.year,befTime.month,int(b[0])
-        return Time(year,month,day),a.group()
-    return None
-def extract_time_8(s:str,befTime:Time)->Tuple[Time,str]|None:
-    """
-    同月XX日から抽出
-    """
-    a=  re.search(r'同月',s)
-    if a is not None:
-        year,month=befTime.year,befTime.month
-        return Time(year,month,0),a.group()
-    return None
-def extract_time_9(s:str,befTime:Time)->Tuple[Time,str]|None:
-    """
-    同日から抽出
-    """
-    a=  re.search(r'同日',s)
-    if a is not None:
-        year,month,day=befTime.year,befTime.month,befTime.day
-        return Time(year,month,day),a.group()
-    return None
+    if a is None: return None
+    print(a.groups())
+    for i,v in enumerate(value):
+        #print(i,v)
+        if v=="gengo":
+            if a.group(i+1)=="昭和":res.year+=1925
+            elif a.group(i+1)=="平成":res.year+=1988
+            elif a.group(i+1)=="令和":res.year+=2018
+        elif v=="year":
+            if a.group(i+1)=="元":
+                res.year+=1
+            else:
+                res.year+=int(a.group(i+1))
+        elif v=="month":
+            res.month=int(a.group(i+1))
+        elif v=="day":
+            res.day=int(a.group(i+1))
+    if same is not None:
+        if same=="year":res.year=befTime.year
+        elif same=="month":res.month=befTime.month
+        elif same=="day":res.day=befTime.day
+    return res, a.group()
 
 def export_to_json(filepath,data):
     with open(filepath, 'w', encoding='utf8', newline='') as f:
@@ -183,30 +53,22 @@ def export_to_csv(filepath,data):
             writer.writerow(row)
 
 
-def extract_time(tangos:List[Any],befTime:Time)->Optional[Tuple[Time,str]]:
-    funcs=[
-        extract_time_1,
-        extract_time_2,
-        extract_time_3,
-        extract_time_4,
-        extract_time_5,
-        extract_time_6,
-        extract_time_7,
-        extract_time_8,
-        extract_time_9,
-    ]
-    for f in funcs:
+def extract_time(rules,tangos:List[Any],befTime:Time)->Optional[Tuple[Time,str]]:
+    for rule in rules:
         for tango in tangos:
-            obj=f(tango["content"],befTime)
+            obj=extract_time_(rule,tango["content"],befTime)
             if obj is not None:
                 return obj[0],obj[1]
     return None
     
 def main(inputDir:str,outputDir:str):
     os.makedirs(outputDir, exist_ok=True)
-    files = glob.glob(f"{inputDir}/03/*.json")
+    files = glob.glob(f"{inputDir}/*.json")
     csv_res=[["id","text_id","bunsetsu","text","value"]]
     count=0
+    rules_data=[]
+    with open("./rules/time_rules.json",encoding="utf-8") as f:
+        rules_data=json.load(f)["point"]
     for file in files:
         print(file)
         data={}
@@ -216,7 +78,7 @@ def main(inputDir:str,outputDir:str):
             for content in data["contents"]:
                 for dat in content["datas"]:
                     for bunsetsu in dat["bunsetsu"]:
-                        t=extract_time(bunsetsu["tangos"],befTime)
+                        t=extract_time(rules_data,bunsetsu["tangos"],befTime)
                         if t is not None:
                             befTime=t[0]
                             bunsetsu["time"]={
@@ -230,7 +92,7 @@ def main(inputDir:str,outputDir:str):
     export_to_csv(f"{outputDir}/time_list.csv",csv_res)
 
 if __name__=="__main__":
-    main("../00_process_data","./01")
+    main("../00_process_data/03","./01")
 
 
 
