@@ -1,64 +1,36 @@
 {
     "point": [
         {
-            "regex": "(昭和|平成|令和)(\\d+|元)年(\\d+)月(\\d+)日",
-            "value": [
-                "gengo",
-                "year",
-                "month",
-                "day"
-            ]
+            "regex": "(?P<gengo>昭和|平成|令和)(?P<year>\\d+|元)年(?P<month>\\d+)月(?P<day>\\d+)日"
         },
         {
-            "regex": "(昭和|平成|令和)(\\d+|元)年(\\d+)月",
-            "value": [
-                "gengo",
-                "year",
-                "month"
-            ]
+            "regex": "(?P<gengo>昭和|平成|令和)(?P<year>\\d+|元)年(?P<month>\\d+)月"
         },
         {
-            "regex": "(昭和|平成|令和)(\\d+|元)年",
-            "value": [
-                "gengo",
-                "year"
-            ]
+            "regex": "(?P<gengo>昭和|平成|令和)(?P<year>\\d+|元)年"
         },
         {
-            "regex": "同年(\\d+)月(\\d+)日",
-            "value": [
-                "month",
-                "day"
-            ],
+            "regex": "同年(?P<month>\\d+)月(?P<day>\\d+)日",
             "same": "year"
         },
         {
-            "regex": "同年(\\d+)月",
-            "value": [
-                "month"
-            ],
+            "regex": "同年(?P<month>\\d+)月",
             "same": "year"
         },
         {
             "regex": "同年",
-            "value": [],
             "same": "year"
         },
         {
-            "regex": "同月(\\d+)日",
-            "value": [
-                "day"
-            ],
+            "regex": "同月(?P<day>\\d+)日",
             "same": "month"
         },
         {
             "regex": "同月",
-            "value": [],
             "same": "month"
         },
         {
             "regex": "同日",
-            "value": [],
             "same": "day"
         }
     ],

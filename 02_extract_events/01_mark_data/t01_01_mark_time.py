@@ -14,27 +14,27 @@ from typing import List, Tuple, Dict, Set, Any
 
 def extract_time_(rule,s:str,befTime:Time)->Tuple[Time,str]|None:
     regex=rule["regex"]
-    value=rule["value"]
     same=rule.get("same")
     res=Time()
     a= re.search(regex,s)
     if a is None: return None
-    print(a.groups())
-    for i,v in enumerate(value):
-        #print(i,v)
-        if v=="gengo":
-            if a.group(i+1)=="昭和":res.year+=1925
-            elif a.group(i+1)=="平成":res.year+=1988
-            elif a.group(i+1)=="令和":res.year+=2018
-        elif v=="year":
-            if a.group(i+1)=="元":
-                res.year+=1
-            else:
-                res.year+=int(a.group(i+1))
-        elif v=="month":
-            res.month=int(a.group(i+1))
-        elif v=="day":
-            res.day=int(a.group(i+1))
+    gengo_str=a.groupdict().get("gengo")
+    year_str=a.groupdict().get("year")
+    month_str=a.groupdict().get("month")
+    day_str=a.groupdict().get("day")
+    if gengo_str is not None:
+        if gengo_str=="昭和":res.year+=1925
+        elif gengo_str=="平成":res.year+=1988
+        elif gengo_str=="令和":res.year+=2018
+    if year_str is not None:
+        if year_str=="元":
+            res.year+=1
+        else:
+            res.year+=int(year_str)
+    if month_str is not None:
+        res.month=int(month_str)
+    if day_str is not None:
+        res.day=int(day_str)
     if same is not None:
         if same=="year":res.year=befTime.year
         elif same=="month":res.month=befTime.month
