@@ -17,12 +17,10 @@
         end?:string //終了を表すテキスト
     }
     span_value:{
-        begin?:number//開始となる日付
-        end?:number//終了となる日付
+        begin?:number //開始となる日付
+        end?:number //終了となる日付
     }
 }
-
-
 """
 
 import glob

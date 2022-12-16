@@ -61,7 +61,8 @@ def main(inputDir:str,outputDir:str):
             for content in data["contents"]:
                 for dat in content["datas"]:
                     if dat.get("event") is None:continue
-                    if dat["event"].get("people") is None or dat["event"].get("times") is None:continue
+                    if dat["event"].get("people") is None:continue
+                    #if dat["event"].get("times") is None:continue
                     dat["event"]["acts"]=extract_events(dat)
         export_to_json(f"{outputDir}/{output_path}.json",data)
         

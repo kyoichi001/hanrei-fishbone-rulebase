@@ -78,15 +78,24 @@ class Sentence:
                 res[bnst.parent_id-1].append(bnst.id-1)
         return Graph(res)
 
-
 class HanreiContents:
     """
     jsonのcontentsの型定義
     """
     def __init__(self,type:str,header:str,texts:List[Text],selifs:Optional[List[ReplaceSelif]],blackets:Optional[List[ReplaceBlacket]],datas:List[Sentence]):
-      self.type
-      self.header
-      self.texts
-      self.selifs
-      self.blackets
-      self.datas
+      self.type=type
+      self.header=header
+      self.texts=texts
+      self.selifs=selifs
+      self.blackets=blackets
+      self.datas=datas
+
+def convert_json2class(data):
+    """
+    jsonファイルをクラスに変換
+    """
+
+def convert_class2json(data):
+    """
+    クラスをjsonファイル用の辞書に変換
+    """

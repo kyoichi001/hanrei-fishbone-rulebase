@@ -12,11 +12,11 @@ from value.time import Time
 from typing import Optional
 from typing import List, Tuple, Dict, Set, Any
 
-def extract_time_(rule,s:str,befTime:Time)->Tuple[Time,str]|None:
+def extract_point_time(rule,tango:str,befTime:Time)->Tuple[Time,str]|None:
     regex=rule["regex"]
     same=rule.get("same")
     res=Time()
-    a= re.search(regex,s)
+    a= re.search(regex,tango)
     if a is None: return None
     gengo_str=a.groupdict().get("gengo")
     year_str=a.groupdict().get("year")
@@ -41,6 +41,17 @@ def extract_time_(rule,s:str,befTime:Time)->Tuple[Time,str]|None:
         elif same=="day":res.day=befTime.day
     return res, a.group()
 
+def extract_begin_time(rule,tango:str):
+    if rule not in tango:return False #該当する文字列が単語の中に出現しているかどうか
+    return True
+def extract_end_time(rule,tango:str):
+    if rule not in tango:return False #該当する文字列が単語の中に出現しているかどうか
+    return True
+
+def extract_other_time(rule,tango:str):
+    if rule not in tango:return False #該当する文字列が単語の中に出現しているかどうか
+    return True
+
 def export_to_json(filepath,data):
     with open(filepath, 'w', encoding='utf8', newline='') as f:
         json.dump(data, f, ensure_ascii=False, indent=2)
@@ -53,40 +64,53 @@ def export_to_csv(filepath,data):
             writer.writerow(row)
 
 
-def extract_time(rules,tangos:List[Any],befTime:Time)->Optional[Tuple[Time,str]]:
-    for rule in rules:
-        for tango in tangos:
-            obj=extract_time_(rule,tango["content"],befTime)
+def extract_times(rule,tangos:List[Any],befTime:Time)->Tuple[List,Optional[Time]]:
+    res=[]
+    time=None
+    for tango in tangos:
+        for r in rule["point"]:
+            obj=extract_point_time(r,tango["content"],befTime)
             if obj is not None:
-                return obj[0],obj[1]
-    return None
+                res.append({"type":"point","text":obj[1],"value":obj[0].value()})
+                time=obj[0]
+                break
+        for r in rule["begin"]:
+            begin_flag=extract_begin_time(r,tango["content"])
+            if begin_flag: 
+                res.append({"type":"begin","text":tango["content"]})
+        for r in rule["end"]:
+            begin_flag=extract_end_time(r,tango["content"])
+            if begin_flag: 
+                res.append({"type":"end","text":tango["content"]})
+        for r in rule["other"]:
+            begin_flag=extract_other_time(r,tango["content"])
+            if begin_flag:
+                res.append({"type":"other","text":tango["content"]})
+    return res,time
     
 def main(inputDir:str,outputDir:str):
     os.makedirs(outputDir, exist_ok=True)
     files = glob.glob(f"{inputDir}/*.json")
     csv_res=[["id","text_id","bunsetsu","text","value"]]
     count=0
-    rules_data=[]
+    rule_data={}
     with open("./rules/time_rules.json",encoding="utf-8") as f:
-        rules_data=json.load(f)["point"]
+        rule_data=json.load(f)
     for file in files:
         print(file)
         data={}
         with open(file,encoding="utf-8") as f:
             data=json.load(f)
-            befTime=None
-            for content in data["contents"]:
-                for dat in content["datas"]:
-                    for bunsetsu in dat["bunsetsu"]:
-                        t=extract_time(rules_data,bunsetsu["tangos"],befTime)
-                        if t is not None:
-                            befTime=t[0]
-                            bunsetsu["time"]={
-                                "text":t[1],
-                                "value":t[0].value()
-                            }
-                            csv_res.append([count,dat["text_id"],"".join([tango["content"] for tango in bunsetsu["tangos"]]),t[1],t[0].value()])
-                            count+=1
+        befTime=None
+        for content in data["contents"]:
+            for dat in content["datas"]:
+                for bunsetsu in dat["bunsetsu"]:
+                    times,time=extract_times(rule_data,bunsetsu["tangos"],befTime)
+                    if time is not None:befTime=time
+                    bunsetsu["times"]=times
+                    for t in times:
+                        csv_res.append([count,dat["text_id"],"".join([tango["content"] for tango in bunsetsu["tangos"]]),t["text"],t.get("value")])
+                        count+=1
         output_path=os.path.splitext(os.path.basename(file))[0]
         export_to_json(f"{outputDir}/{output_path}.json",data)
     export_to_csv(f"{outputDir}/time_list.csv",csv_res)
