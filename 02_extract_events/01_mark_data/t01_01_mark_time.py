@@ -42,15 +42,21 @@ def extract_point_time(rule,tango:str,befTime:Time)->Tuple[Time,str]|None:
     return res, a.group()
 
 def extract_begin_time(rule,tango:str):
-    if rule not in tango:return False #該当する文字列が単語の中に出現しているかどうか
-    return True
+    regex=rule["regex"]
+    a= re.search(regex,tango)
+    if a is None: return None
+    return a.group()
 def extract_end_time(rule,tango:str):
-    if rule not in tango:return False #該当する文字列が単語の中に出現しているかどうか
-    return True
+    regex=rule["regex"]
+    a= re.search(regex,tango)
+    if a is None: return None
+    return a.group()
 
 def extract_other_time(rule,tango:str):
-    if rule not in tango:return False #該当する文字列が単語の中に出現しているかどうか
-    return True
+    regex=rule["regex"]
+    a= re.search(regex,tango)
+    if a is None: return None
+    return a.group()
 
 def export_to_json(filepath,data):
     with open(filepath, 'w', encoding='utf8', newline='') as f:
@@ -75,17 +81,17 @@ def extract_times(rule,tangos:List[Any],befTime:Time)->Tuple[List,Optional[Time]
                 time=obj[0]
                 break
         for r in rule["begin"]:
-            begin_flag=extract_begin_time(r,tango["content"])
-            if begin_flag: 
-                res.append({"type":"begin","text":tango["content"]})
+            obj=extract_begin_time(r,tango["content"])
+            if obj is not None: 
+                res.append({"type":"begin","text":obj})
         for r in rule["end"]:
-            begin_flag=extract_end_time(r,tango["content"])
-            if begin_flag: 
-                res.append({"type":"end","text":tango["content"]})
+            obj=extract_end_time(r,tango["content"])
+            if obj is not None: 
+                res.append({"type":"end","text":obj})
         for r in rule["other"]:
-            begin_flag=extract_other_time(r,tango["content"])
-            if begin_flag:
-                res.append({"type":"other","text":tango["content"]})
+            obj=extract_other_time(r,tango["content"])
+            if obj is not None:
+                res.append({"type":"other","text":obj})
     return res,time
     
 def main(inputDir:str,outputDir:str):
@@ -107,7 +113,8 @@ def main(inputDir:str,outputDir:str):
                 for bunsetsu in dat["bunsetsu"]:
                     times,time=extract_times(rule_data,bunsetsu["tangos"],befTime)
                     if time is not None:befTime=time
-                    bunsetsu["times"]=times
+                    if len(times)!=0:
+                        bunsetsu["times"]=times
                     for t in times:
                         csv_res.append([count,dat["text_id"],"".join([tango["content"] for tango in bunsetsu["tangos"]]),t["text"],t.get("value")])
                         count+=1

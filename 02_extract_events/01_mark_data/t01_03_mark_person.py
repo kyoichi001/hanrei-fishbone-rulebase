@@ -9,9 +9,9 @@ import json
 import re
 from re import T
 from typing import List, Tuple, Dict, Set,Optional
-from ..value.bunsetsu import Bunsetsu,Tango,Sentence
-from ..value.event import Event
-from ..value.graph import Graph
+from value.bunsetsu import Bunsetsu,Tango,Sentence
+from value.event import Event
+from value.graph import Graph
 from rules.rule_loader import Rule,load_rules
 
 def match_rule(tango:Tango,rule:Rule)->bool:

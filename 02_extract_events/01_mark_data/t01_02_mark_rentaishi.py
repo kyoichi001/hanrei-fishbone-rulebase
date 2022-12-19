@@ -13,9 +13,9 @@ import os
 import json
 from re import T
 from typing import List, Tuple, Dict, Set,Optional
-from ..value.bunsetsu import Bunsetsu, Tango
-from ..value.graph import Graph
-from ..value.graph import Graph
+from value.bunsetsu import Bunsetsu, Tango
+from value.graph import Graph
+from value.graph import Graph
 
 def is_meishi(bunsetsu:Bunsetsu):
     for tango in bunsetsu.tangos:
@@ -39,7 +39,7 @@ def check_rentaishi(bnsts:List[Bunsetsu])->List[bool]:
     flagList[bnsts[-1].id]=False
     li=[[] for i in range(len(bnsts)+1)]
     for bnst in bnsts:
-        if bnst.parent_id!=-1:li[bnst.parent_id].append(bnst.id)
+        if bnst.to!=-1:li[bnst.to].append(bnst.id)
     g=Graph(li)
     check_rentaishi_(bnsts[-1].id,g,flagList,bnsts)
     for bnst in bnsts:

@@ -1,26 +1,36 @@
 """
 マークされた時間表現の文節から、出来事の文節に当てはまるものを抽出
-付随する文節をもとに、時間表現のタイプを決定する
+文節のリストを入力とし、時間オブジェクト（以下参照）のリストを出力する
 
-時間の文節が一つの場合
-{
-    id:number//文節のID
-    text:string
-    value:number//日付を表す値
-}
-
-時間の文節が複数にまたがる場合
+```
 {
     bnst_ids:number[] //文節IDリスト
     span_text:{
         begin?:string //開始を表すテキスト
         end?:string //終了を表すテキスト
+        point?:string//一点を表すテキスト
     }
     span_value:{
         begin?:number //開始となる日付
         end?:number //終了となる日付
+        point?:number //一点の時間の日付
     }
 }
+```
+## 疑似コード
+1. for bnst in bnsts
+    1. if bnst has times and bnst is not rentaishi
+        1. let queue; queue.push(bnst)
+    1. while len(queue)!=0:
+        1. bnst= queue.top; queue.pop
+        1. for time in bnst.times
+            1. time_typeがmodのときは、bnst_idsに文節IDを加えるだけでなにもしない
+            1. time_typeがbegin,endのときも同様
+            1. time_typeがpointのときは、span_text.point, span_value.pointにそれぞれ値を格納
+            1. 一つの文節にbegin,endが同時に含まれる場合は一番後ろの単語を優先
+        1. if bnst.before has times
+            1. queue.push(bnst)
+    1. 得られた時間オブジェクトを出力にpush。再度文節リストを精査（連続する時間表現を除く）
 """
 
 import glob
@@ -31,17 +41,48 @@ import re
 import csv
 from typing import Optional
 from typing import List, Tuple, Dict, Set,Optional,Any
+from collections import deque
 
 def extract_time(dat:Any):
     res=[]
-    for bnst in dat["bunsetsu"]:
-        if not bnst["is_rentaishi"] and bnst.get("time") is not None:
-            res.append({
-                "id":bnst["id"],
-                "text":bnst["time"]["text"],
-                "value":bnst["time"]["value"]
-            })
-    return res
+    time_obj={
+        "bnst_ids":[],
+        "span_text":{},
+        "span_value":{}
+    }
+    mode="point"
+    i=len(dat["bunsetsu"])-1
+    extracting=False
+    while i>=0: #文節を後ろから見る
+        bnst=dat["bunsetsu"][i]
+        if not bnst["is_rentaishi"] and bnst.get("times") is not None:
+            time_obj["bnst_ids"].append(i)
+            extracting=True
+        elif extracting:
+            if len(list(time_obj["span_value"].keys()))!=0:
+                res.append(time_obj)
+            time_obj={
+                "bnst_ids":[],
+                "span_text":{},
+                "span_value":{}
+            }
+            mode="point"
+            extracting=False
+        if extracting:
+            for time in reversed(bnst["times"]):
+                if time["type"]=="point":
+                    time_obj["span_text"][mode]=time["text"]
+                    time_obj["span_value"][mode]=time["value"]
+                elif time["type"]=="begin" and mode=="point":
+                    mode="begin"
+                elif time["type"]=="end" and mode=="point":
+                    mode="end"
+                elif time["type"]=="other":
+                    pass
+        i-=1
+    if extracting:
+        res.append(time_obj)
+    return list(reversed(res))
 
 def export_to_json(filepath,data):
     with open(filepath, 'w', encoding='utf8', newline='') as f:
@@ -56,8 +97,6 @@ def main(inputDir:str,outputDir:str):
         data={}
         with open(file,encoding="utf-8") as f:
             data=json.load(f)
-            befTime=None
-            index=0
             for content in data["contents"]:
                 for dat in content["datas"]:
                     times=extract_time(dat)
