@@ -55,24 +55,31 @@ def extract_time(dat:Any):
     extracting=False
     while i>=0: #文節を後ろから見る
         bnst=dat["bunsetsu"][i]
-        if not bnst["is_rentaishi"] and bnst.get("times") is not None:
+        if not bnst["is_rentaishi"] and bnst.get("times") is not None: 
+            #連体詞でないかつtimesプロパティを持つなら、出力の文節idリストに追加し、抽出フラグを立てる
             time_obj["bnst_ids"].append(i)
             extracting=True
         elif extracting:
-            if len(list(time_obj["span_value"].keys()))!=0:
-                res.append(time_obj)
-            time_obj={
-                "bnst_ids":[],
-                "span_text":{},
-                "span_value":{}
-            }
-            mode="point"
-            extracting=False
+            if bnst["is_rentaishi"] and bnst.get("times") is not None:
+                # 文節が連体詞であっても、時間表現をもち、かつ抽出が継続している場合
+                time_obj["bnst_ids"].append(i)
+            else:
+                #抽出の条件が切れたらリセット
+                if len(list(time_obj["span_value"].keys()))!=0:
+                    res.append(time_obj)
+                time_obj={
+                    "bnst_ids":[],
+                    "span_text":{},
+                    "span_value":{}
+                }
+                mode="point"
+                extracting=False
         if extracting:
             for time in reversed(bnst["times"]):
                 if time["type"]=="point":
                     time_obj["span_text"][mode]=time["text"]
                     time_obj["span_value"][mode]=time["value"]
+                    mode="point"
                 elif time["type"]=="begin" and mode=="point":
                     mode="begin"
                 elif time["type"]=="end" and mode=="point":
