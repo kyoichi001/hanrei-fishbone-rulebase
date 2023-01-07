@@ -30,13 +30,26 @@ def mark_person(rules,bunsetsu):
             bunsetsu["to"],
             [Tango(tango["content"],tango["type1"],tango["type2"],tango["type3"]) for tango in bunsetsu["tangos"]]
         )
+    flg=False
+    content=""
     for tango in bnst.tangos:
-        for rule in rules:
-            if match_rule(tango,rule):
-                bunsetsu["person"]={
-                    "content":tango.content,
-                }
-                return bunsetsu
+        if tango.type1 not in ["名詞", "助詞"]:return bunsetsu
+        if tango.type1 =="名詞" and tango.type2!="読点":content=tango.content
+        if tango.type1 == "助詞":
+            flg = tango.content in ["は", "が", "も"]
+            if not flg:return bunsetsu #それ以外の助詞が入っていたら排除
+        #for rule in rules:
+        #    if match_rule(tango,rule):
+        #        bunsetsu["person"]={
+        #            "content":tango.content,
+        #        }
+        #        return bunsetsu
+    if flg:
+        bunsetsu["person"]={
+            "content":content,
+        }
+    return bunsetsu
+
 
 def main(inputDir:str,outputDir:str):
     os.makedirs(outputDir, exist_ok=True)
