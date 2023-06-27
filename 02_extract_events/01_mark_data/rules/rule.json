@@ -1,0 +1,32 @@
+{
+    "rules": [
+        {
+            "name": "_ps",
+            "rule": {
+                "type": "c",
+                "c": "_ps"
+            }
+        },
+        {
+            "name": "_psら",
+            "rule": {
+                "type": "c",
+                "c": "_psら"
+            }
+        },
+        {
+            "name": "_ps+名詞",
+            "rule": {
+                "type": "regex",
+                "c": "_ps.+"
+            }
+        },
+        {
+            "name": "名詞+_ps",
+            "rule": {
+                "type": "regex",
+                "c": ".+_ps"
+            }
+        }
+    ]
+}
