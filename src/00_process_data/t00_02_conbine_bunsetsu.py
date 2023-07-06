@@ -76,12 +76,12 @@ def main(inputDir: str, outputDir: str):
     json_files = glob.glob(f"{inputDir}/*.json")
     for file in json_files:
         print(file)
-        data = open(file, "r", encoding="utf-8")
-        data = json.load(data)
+        dat = open(file, "r", encoding="utf-8")
+        data = json.load(dat)
         for content in data["contents"]:
-            for dat in content["datas"]:
-                newBsts = conbine_bunsetsu(dat["bunsetsu"])
-                dat["bunsetsu"] = newBsts
+            for c in content["datas"]:
+                newBsts = conbine_bunsetsu(c["bunsetsu"])
+                c["bunsetsu"] = newBsts
         output_path = os.path.splitext(os.path.basename(file))[0]
         export_to_json(f"{outputDir}/{output_path}.json", data)
 

@@ -4,6 +4,7 @@ import os
 import json
 from re import T
 import csv
+from typing import List, Tuple, Dict, Set, Any
 
 """
 TMSの係り受け解析結果とpdfの抽出結果を合成したjsonファイルを作成
@@ -21,14 +22,14 @@ csvファイルに複数文書の係り受け解析結果があってもだめ
 def load_csv(filepath: str):
     print(filepath)
     output_path = os.path.splitext(os.path.basename(filepath))[0]
-    res = {
+    res:Any = {
         "filename": output_path,
         "texts": []
     }
     with open(filepath, encoding="cp932") as f:
         reader = csv.reader(f)
         next(reader)
-        text_obj = {  # 文Obj
+        text_obj:Any = {  # 文Obj
             "text_id": 1-1,
             "bunsetsu": []
         }
@@ -60,8 +61,8 @@ def load_csv(filepath: str):
 
 def conbine_to_json(outputDir: str, filepath: str, csv_data):
     output_path = os.path.splitext(os.path.basename(filepath))[0]
-    data = open(filepath, "r", encoding="utf-8")
-    data = json.load(data)
+    dat = open(filepath, "r", encoding="utf-8")
+    data = json.load(dat)
     index = 0
     for content in data["contents"]:
         content["datas"] = []

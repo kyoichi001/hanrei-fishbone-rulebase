@@ -13,7 +13,7 @@ from typing import Optional
 from typing import List, Tuple, Dict, Set, Any
 
 
-def extract_point_time(rule, tango: str, befTime: Time) -> Optional[Tuple[Time, str]]:
+def extract_point_time(rule, tango: str, befTime: Optional[Time]) -> Optional[Tuple[Time, str]]:
     regex = rule["regex"]
     same = rule.get("same")
     res = Time()
@@ -40,7 +40,7 @@ def extract_point_time(rule, tango: str, befTime: Time) -> Optional[Tuple[Time, 
         res.month = int(month_str)
     if day_str is not None:
         res.day = int(day_str)
-    if same is not None:
+    if same is not None and befTime is not None:
         if same == "year":
             res.year = befTime.year
         elif same == "month":
@@ -87,7 +87,7 @@ def export_to_csv(filepath, data):
             writer.writerow(row)
 
 
-def extract_times(rule, tangos: List[Any], befTime: Time) -> Tuple[List, Optional[Time]]:
+def extract_times(rule, tangos: List[Any], befTime:Optional[Time]) -> Tuple[List, Optional[Time]]:
     res = []
     time = None
     for tango in tangos:
@@ -116,15 +116,15 @@ def extract_times(rule, tangos: List[Any], befTime: Time) -> Tuple[List, Optiona
 def main(inputDir: str, outputDir: str):
     os.makedirs(outputDir, exist_ok=True)
     files = glob.glob(f"{inputDir}/*.json")
-    csv_res = [["id", "text_id", "bunsetsu", "text", "value"]]
+    csv_res:List[Any] = [["id", "text_id", "bunsetsu", "text", "value"]]
     count = 0
     rule_data = open("./rules/time_rules.json", "r", encoding="utf-8")
     rule_data = json.load(rule_data)
     for file in files:
         print(file)
-        data = open(file, "r", encoding="utf-8")
-        data = json.load(data)
-        befTime = None
+        f = open(file, "r", encoding="utf-8")
+        data = json.load(f)
+        befTime:Optional[Time] = None
         for content in data["contents"]:
             for dat in content["datas"]:
                 for bunsetsu in dat["bunsetsu"]:
@@ -144,4 +144,4 @@ def main(inputDir: str, outputDir: str):
 
 
 if __name__ == "__main__":
-    main("../00_process_data/03", "./01")
+    main("../00_process_data/data", "./01")
