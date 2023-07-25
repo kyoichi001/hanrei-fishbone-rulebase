@@ -46,7 +46,7 @@ from collections import deque
 
 def extract_time(dat: Any):
     res = []
-    time_obj = {
+    time_obj:Any = {
         "bnst_ids": [],
         "span_text": {},
         "span_value": {}

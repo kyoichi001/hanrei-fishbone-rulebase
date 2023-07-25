@@ -44,8 +44,8 @@ def main(inputDir: str, outputDir: str):
     files = glob.glob(f"{inputDir}/*.json")
     for file in files:
         print(file)
-        data = open(file, "r", encoding="utf-8")
-        data = json.load(data)
+        fileData = open(file, "r", encoding="utf-8")
+        data = json.load(fileData)
         contents = data["contents"]
         for content in contents:
             # if len(content["texts"])>0:
