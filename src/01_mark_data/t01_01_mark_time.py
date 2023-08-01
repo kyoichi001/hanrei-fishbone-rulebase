@@ -41,6 +41,9 @@ def extract_point_time(rule, tango: str, befTime: Optional[Time]) -> Optional[Tu
     if day_str is not None:
         res.day = int(day_str)
     if same is not None and befTime is not None:
+        res.year = befTime.year
+        res.month = befTime.month
+        res.day = befTime.day
         if same == "year":
             res.year = befTime.year
         elif same == "month":
@@ -92,22 +95,22 @@ def extract_times(rule, tangos: List[Any], befTime:Optional[Time]) -> Tuple[List
     time = None
     for tango in tangos:
         for r in rule["point"]:
-            obj = extract_point_time(r, tango["content"], befTime)
+            obj = extract_point_time(r, tango["text"], befTime)
             if obj is not None:
                 res.append(
                     {"type": "point", "text": obj[1], "value": obj[0].value()})
                 time = obj[0]
                 break
         for r in rule["begin"]:
-            obj = extract_begin_time(r, tango["content"])
+            obj = extract_begin_time(r, tango["text"])
             if obj is not None:
                 res.append({"type": "begin", "text": obj})
         for r in rule["end"]:
-            obj = extract_end_time(r, tango["content"])
+            obj = extract_end_time(r, tango["text"])
             if obj is not None:
                 res.append({"type": "end", "text": obj})
         for r in rule["other"]:
-            obj = extract_other_time(r, tango["content"])
+            obj = extract_other_time(r, tango["text"])
             if obj is not None:
                 res.append({"type": "other", "text": obj})
     return res, time
@@ -125,18 +128,19 @@ def main(inputDir: str, outputDir: str):
         f = open(file, "r", encoding="utf-8")
         data = json.load(f)
         befTime:Optional[Time] = None
-        for content in data["contents"]:
-            for dat in content["datas"]:
-                for bunsetsu in dat["bunsetsu"]:
+        for content in data["contents"]["fact_reason"]["sections"]:
+            if "texts" not in content:continue
+            for dat in content["texts"]:
+                for bunsetsu in dat["bunsetu"]:
                     times, time = extract_times(
-                        rule_data, bunsetsu["tangos"], befTime)
+                        rule_data, bunsetsu["tokens"], befTime)
                     if time is not None:
                         befTime = time
                     if len(times) != 0:
                         bunsetsu["times"] = times
                     for t in times:
                         csv_res.append([count, dat["text_id"], "".join(
-                            [tango["content"] for tango in bunsetsu["tangos"]]), t["text"], t.get("value")])
+                            [tango["text"] for tango in bunsetsu["tokens"]]), t["text"], t.get("value")])
                         count += 1
         output_path = os.path.splitext(os.path.basename(file))[0]
         export_to_json(f"{outputDir}/{output_path}.json", data)
@@ -144,4 +148,4 @@ def main(inputDir: str, outputDir: str):
 
 
 if __name__ == "__main__":
-    main("../00_process_data/data", "./01")
+    main("../00_process_data/03", "./01")

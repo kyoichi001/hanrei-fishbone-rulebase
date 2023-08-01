@@ -15,8 +15,9 @@ def is_meishi(bst):
     """
     文節の中にある単語が名詞・接頭詞のみか
     """
-    for tango in bst["tangos"]:
-        if not ((tango["type1"] == "名詞" or tango["type1"] == "接頭詞") and tango["type2"] != "非自立"):
+    for tango in bst["tokens"]:
+        tags=tango["tag"].split("-")
+        if not ("名詞" in tags or "補助記号" in tags):
             return False
     return True
 
@@ -29,7 +30,8 @@ def merge_tree(bsts: List[Any], bst1: int, bst2: int):
     bsts[bst1] = {
         "id": bsts[bst1]["id"],
         "to": bsts[bst2]["to"],
-        "tangos": bsts[bst1]["tangos"]+bsts[bst2]["tangos"]
+        "text":bsts[bst1]["text"]+bsts[bst2]["text"],
+        "tokens": bsts[bst1]["tokens"]+bsts[bst2]["tokens"]
     }
     del bsts[bst2]
     # print(bsts[bst1])
@@ -40,8 +42,7 @@ def merge_tree(bsts: List[Any], bst1: int, bst2: int):
             bst["to"] -= 1
     for bst in bsts:
         if bst["to"] == bst["id"]:
-            print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
-            print(bsts)
+            print(f"error🛑 bst.to == bst.id : {bsts}")
             break
     return bsts
 
@@ -78,13 +79,14 @@ def main(inputDir: str, outputDir: str):
         print(file)
         dat = open(file, "r", encoding="utf-8")
         data = json.load(dat)
-        for content in data["contents"]:
-            for c in content["datas"]:
-                newBsts = conbine_bunsetsu(c["bunsetsu"])
-                c["bunsetsu"] = newBsts
+        for content in data["contents"]["fact_reason"]["sections"]:
+            if "texts" not in content:continue
+            for c in content["texts"]:
+                newBsts = conbine_bunsetsu(c["bunsetu"])
+                c["bunsetu"] = newBsts
         output_path = os.path.splitext(os.path.basename(file))[0]
         export_to_json(f"{outputDir}/{output_path}.json", data)
 
 
 if __name__ == "__main__":
-    main("./fishbone_out", "./02")
+    main("./data", "./02")

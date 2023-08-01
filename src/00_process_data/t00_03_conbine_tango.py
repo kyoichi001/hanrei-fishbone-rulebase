@@ -15,7 +15,9 @@ def is_meishi(tango):
     """
     文節の中にある単語が名詞・接頭詞のみか
     """
-    return tango["type1"] == "名詞" or tango["type1"] == "接頭詞"
+    tags=tango["tag"].split("-")
+    #return "副詞可能" not in tags and ("名詞" in tags or "接尾辞" in tags or "接頭辞" in tags or "補助記号" in tags)
+    return ("名詞" in tags or "接尾辞" in tags or "接頭辞" in tags or "補助記号" in tags)
 
 
 def combine_tango(tangos):
@@ -27,26 +29,14 @@ def combine_tango(tangos):
             break
         if is_meishi(tangos[index]) and is_meishi(tangos[index+1]):
             tangos[index] = {
-                "content": tangos[index]["content"]+tangos[index+1]["content"],
-                "type1": "名詞",
-                "type2": "",
-                "type3": "",
+                "text": tangos[index]["text"]+tangos[index+1]["text"],
+                "tag": "名詞",
+#                "start_char": tangos[index]["start_char"],
+#                "end_char": tangos[index+1]["end_char"],
             }
             del tangos[index+1]
         else:
-            tangos[index] = {
-                "content": tangos[index]["content"],
-                "type1":  tangos[index]["type1"],
-                "type2": tangos[index]["type2"],
-                "type3":  tangos[index]["type3"],
-            }
             index += 1
-    tangos[-1] = {
-        "content": tangos[index]["content"],
-        "type1":  tangos[index]["type1"],
-        "type2": tangos[index]["type2"],
-        "type3":  tangos[index]["type3"],
-    }
     return tangos
 
 
@@ -62,11 +52,16 @@ def main(inputDir: str, outputDir: str):
         print(file)
         dat = open(file, "r", encoding="utf-8")
         data = json.load(dat)
-        for content in data["contents"]:
-            for c in content["datas"]:
-                for bunsetsu in c["bunsetsu"]:
-                    newTangos = combine_tango(bunsetsu["tangos"])
-                    bunsetsu["tangos"] = newTangos
+        for content in data["contents"]["fact_reason"]["sections"]:
+            if "texts" not in content:continue
+            for c in content["texts"]:
+                for bunsetsu in c["bunsetu"]:
+                    newTangos = combine_tango(bunsetsu["tokens"])
+                    bunsetsu["tokens"] = newTangos
+            if "selifs" in content:
+                del content["selifs"]
+            if "blackets" in content:
+                del content["blackets"] #とりあえずの応急処置
         output_path = os.path.splitext(os.path.basename(file))[0]
         export_to_json(f"{outputDir}/{output_path}.json", data)
 

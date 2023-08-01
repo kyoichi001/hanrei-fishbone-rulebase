@@ -39,17 +39,15 @@ class Tango:
     """
     単語
     """
-    def __init__(self,content,type1,type2,type3):
+    def __init__(self,content:str,tags:str):
         self.content=content
-        self.type1=type1
-        self.type2=type2
-        self.type3=type3
+        self.tags=tags
 
 class Bunsetsu:
     """
     文節
     """
-    def __init__(self,id:int,to:int,tangos:List[Tango],is_rentaishi=False,time:TimeAttribute=None,person:PersonAttribute=None) -> None:
+    def __init__(self,id:int,to:int,tangos:List[Tango],is_rentaishi=False,time:Optional[TimeAttribute]=None,person:Optional[PersonAttribute]=None) -> None:
         self.id=id
         self.to=to
         self.tangos=tangos
@@ -69,13 +67,13 @@ class Sentence:
         """
         文節のグラフを返す
         """
-        res=[[] for i in self.bnsts]
+        res:List[List[int]]=[[] for i in self.bnsts]
         for bnst in self.bnsts:
-            if bnst.parent_id==-1:
+            if bnst.to==-1:
                 continue
             else:
-                res[bnst.id-1].append(bnst.parent_id-1)
-                res[bnst.parent_id-1].append(bnst.id-1)
+                res[bnst.id-1].append(bnst.to-1)
+                res[bnst.to-1].append(bnst.id-1)
         return Graph(res)
 
 class HanreiContents:

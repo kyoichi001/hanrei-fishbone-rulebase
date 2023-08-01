@@ -9,13 +9,13 @@ from operator import is_
 import os
 import json
 from re import T
-from typing import List, Tuple, Dict, Set, Optional
+from typing import List, Tuple, Dict, Set, Optional,Any
 from value.bunsetsu import Bunsetsu, Tango
 from value.graph import Graph
 from value.graph import Graph
 
 
-def check_rentaishi_(root: int, g: Graph, timeflagList: List[bool], personflagList: List[bool],  bnsts: List[Bunsetsu]):
+def check_rentaishi_(root: int, g: Graph, timeflagList: List[bool], personflagList: List[bool],  bnsts: List[Any]):
     children = g.g[root]
     # print(bnsts[root])
     if personflagList[root] or bnsts[root].get("person") is not None:
@@ -28,12 +28,12 @@ def check_rentaishi_(root: int, g: Graph, timeflagList: List[bool], personflagLi
         check_rentaishi_(child, g, timeflagList, personflagList, bnsts)
 
 
-def check_rentaishi(bnsts) -> List[bool]:
+def check_rentaishi(bnsts) -> Tuple[List[bool],List[bool]]:
     timeflagList = [False for i in range(len(bnsts))]
     personflagList = [False for i in range(len(bnsts))]
     timeflagList[bnsts[-1]["id"]] = False
     personflagList[bnsts[-1]["id"]] = False
-    li = [[] for i in range(len(bnsts)+1)]
+    li:List[List[int]] = [[] for i in range(len(bnsts)+1)]
     for bnst in bnsts:
         if bnst["to"] != -1:
             li[bnst["to"]].append(bnst["id"])
@@ -52,13 +52,14 @@ def main(inputDir: str, outputDir: str):
     files = glob.glob(f"{inputDir}/*.json")
     for file in files:
         print(file)
-        data = open(file, "r", encoding="utf-8")
-        data = json.load(data)
-        for content in data["contents"]:
-            for d in content["datas"]:
-                bnsts = d["bunsetsu"]
+        filedat = open(file, "r", encoding="utf-8")
+        data = json.load(filedat)
+        for content in data["contents"]["fact_reason"]["sections"]:
+            if "texts" not in content:continue
+            for d in content["texts"]:
+                bnsts = d["bunsetu"]
                 tt, pp = check_rentaishi(bnsts)
-                for bunsetsu in d["bunsetsu"]:
+                for bunsetsu in d["bunsetu"]:
                     if tt[bunsetsu["id"]]:
                         bunsetsu["time_kakari"] = tt[bunsetsu["id"]]
                     if pp[bunsetsu["id"]]:

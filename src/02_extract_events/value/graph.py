@@ -3,7 +3,7 @@ class Graph:
     """
     隣接リストをグラフとして保持するクラス
     """
-    def __init__(self,g:Optional[List[List[int]]]) -> None:
+    def __init__(self,g:List[List[int]]) -> None:
         """
         隣接リストで初期化
         """

@@ -16,8 +16,6 @@ from re import T
 from typing import List, Tuple, Dict, Set, Optional
 from value.bunsetsu import Bunsetsu, Tango
 from value.graph import Graph
-from value.graph import Graph
-
 
 def export_to_json(filename: str, data) -> None:
     with open(filename, 'w', encoding='utf8', newline='') as f:
@@ -27,25 +25,29 @@ def export_to_json(filename: str, data) -> None:
 def check_rentaishi_(root: int, g: Graph, flagList: List[bool], bnsts: List[Bunsetsu]):
     def is_meishi(bunsetsu: Bunsetsu):
         for tango in bunsetsu.tangos:
-            if tango.type1 in ["動詞", "形容詞", "副詞"]:
+            tgs=tango.tags.split("-")
+            if "動詞" in tgs or "形容詞" in tgs or "副詞" in tgs:
                 return False
         return True
 
     def is_rentai(bunsetsu: Bunsetsu):
         for tango in bunsetsu.tangos:
-            if tango.type2 == "連体化":
+            tgs=tango.tags.split("-")
+            if "連体詞" in tgs:
                 return True
         return False
 
     def has_joshi(bunsetsu: Bunsetsu):
         for tango in bunsetsu.tangos:
-            if tango.type1 == "助詞":
+            tgs=tango.tags.split("-")
+            if "助詞" in tgs:
                 return True
         return False
+    if g.g is None: return
     children = g.g[root]
     for child in children:
-        if flagList[root] or is_rentai(bnsts[child]) or is_meishi(bnsts[root]) and not has_joshi(bnsts[child]):
-        #if flagList[root] or is_rentai(bnsts[child]):
+        #if flagList[root] or is_rentai(bnsts[child]) or (is_meishi(bnsts[root]) and not has_joshi(bnsts[child])):
+        if flagList[root] or is_rentai(bnsts[child]) or is_meishi(bnsts[root]):
             flagList[child] = True
         check_rentaishi_(child, g, flagList, bnsts)
 
@@ -54,7 +56,7 @@ def check_rentaishi(bnsts: List[Bunsetsu]) -> List[bool]:
     #print("check root")
     flagList = [False for i in range(len(bnsts))]
     flagList[bnsts[-1].id] = False
-    li = [[] for i in range(len(bnsts)+1)]
+    li:list[list[int]] = [[] for i in range(len(bnsts)+1)]
     for bnst in bnsts:
         if bnst.to != -1:
             li[bnst.to].append(bnst.id)
@@ -70,23 +72,23 @@ def main(inputDir: str, outputDir: str):
     files = glob.glob(f"{inputDir}/*.json")
     for file in files:
         print(file)
-        data = open(file, "r", encoding="utf-8")
-        data = json.load(data)
-        for content in data["contents"]:
-            for d in content["datas"]:
+        filedat = open(file, "r", encoding="utf-8")
+        data = json.load(filedat)
+        for content in data["contents"]["fact_reason"]["sections"]:
+            if "texts" not in content:continue
+            for d in content["texts"]:
                 try:
                     bnsts: List[Bunsetsu] = [Bunsetsu(
                         bnst["id"],
                         bnst["to"],
-                        [Tango(tango["content"], tango["type1"], tango["type2"],
-                               tango["type3"]) for tango in bnst["tangos"]]
-                    ) for bnst in d["bunsetsu"]]
+                        [Tango(tango["text"], tango["tag"]) for tango in bnst["tokens"]]
+                    ) for bnst in d["bunsetu"]]
                     b = check_rentaishi(bnsts)
-                    for bunsetsu in d["bunsetsu"]:
+                    for bunsetsu in d["bunsetu"]:
                         if b[bunsetsu["id"]]:
                             bunsetsu["is_rentaishi"] = b[bunsetsu["id"]]
                 except RecursionError as e:
-                    print(d["bunsetsu"])
+                    print(d["bunsetu"])
 
         output_path = os.path.splitext(os.path.basename(file))[0]
         export_to_json(f"{outputDir}/{output_path}.json", data)

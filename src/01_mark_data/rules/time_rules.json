@@ -18,6 +18,10 @@
             "same": "year"
         },
         {
+            "regex": "(?P<month>\\d+)月",
+            "same": "year"
+        },
+        {
             "regex": "同年",
             "same": "year"
         },

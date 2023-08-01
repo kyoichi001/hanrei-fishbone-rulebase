@@ -16,7 +16,9 @@ from rules.rule_loader import Rule,load_rules
 
 def match_rule(tango:Tango,rule:Rule)->bool:
     if rule.types=="c": return tango.content==rule.content #テキストを直接指定
-    if rule.types=="type":return tango.type1==rule.content #品詞
+    if rule.types=="type":
+        tgs=tango.tags.split("-")
+        return rule.content in tgs #品詞
     if rule.types=="regex": return re.fullmatch(rule.content,tango.content) is not None #正規表現
     return True
 
@@ -28,22 +30,24 @@ def mark_person(rules,bunsetsu):
     bnst=Bunsetsu(
             bunsetsu["id"],
             bunsetsu["to"],
-            [Tango(tango["content"],tango["type1"],tango["type2"],tango["type3"]) for tango in bunsetsu["tangos"]]
+            [Tango(tango["text"],tango["tag"]) for tango in bunsetsu["tokens"]]
         )
     flg=False
     content=""
     for tango in bnst.tangos:
-        if tango.type1 not in ["名詞", "助詞"]:return bunsetsu
-        if tango.type1 =="名詞" and tango.type2!="読点":content=tango.content
-        if tango.type1 == "助詞":
-            flg = tango.content in ["は", "が", "も"]
-            if not flg:return bunsetsu #それ以外の助詞が入っていたら排除
-        #for rule in rules:
-        #    if match_rule(tango,rule):
-        #        bunsetsu["person"]={
-        #            "content":tango.content,
-        #        }
-        #        return bunsetsu
+        tgs=tango.tags.split("-")
+        #if "名詞" not in tgs and  "助詞" not in tgs:return bunsetsu
+        #if "名詞" in tgs and "読点" not in tgs:content=tango.content
+        #if "助詞" in tgs:
+        #    flg = tango.content in ["は", "が", "も"]
+        #    if not flg:return bunsetsu #それ以外の助詞が入っていたら排除
+        #if content!="" and flg:break
+        for rule in rules:
+            if match_rule(tango,rule):
+                bunsetsu["person"]={
+                    "content":tango.content,
+                }
+                return bunsetsu
     if flg:
         bunsetsu["person"]={
             "content":content,
@@ -57,14 +61,15 @@ def main(inputDir:str,outputDir:str):
     rules=load_rules("./rules/rule.json")
     for file in files:
         print(file)
-        data = open(file, "r", encoding="utf-8")
-        data=json.load(data)
-        contents =data["contents"]
+        filedat = open(file, "r", encoding="utf-8")
+        data=json.load(filedat)
+        contents =data["contents"]["fact_reason"]["sections"]
         for content in contents:
+            if "texts" not in content:continue
             #if len(content["texts"])>0:
             #    print(content["texts"][0])
-            for dat in content["datas"]:
-                for bunsetsu in dat["bunsetsu"]:
+            for dat in content["texts"]:
+                for bunsetsu in dat["bunsetu"]:
                     bunsetsu=mark_person(rules,bunsetsu)
         output_path=os.path.splitext(os.path.basename(file))[0]
         export_to_json(f"{outputDir}/{output_path}.json",data)

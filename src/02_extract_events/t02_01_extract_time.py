@@ -52,11 +52,11 @@ def extract_time(dat: Any):
         "span_value": {}
     }
     mode = "point"
-    i = len(dat["bunsetsu"])-1
+    i = len(dat["bunsetu"])-1
     extracting = False
     while i >= 0:  # 文節を後ろから見る
         mode = "point"  # 文節が変わったので、時間のフラグをリセット
-        bnst = dat["bunsetsu"][i]
+        bnst = dat["bunsetu"][i]
         if not bnst.get("is_rentaishi", False) and bnst.get("times") is not None:
             # 連体詞でないかつtimesプロパティを持つなら、出力の文節idリストに追加し、抽出フラグを立てる
             time_obj["bnst_ids"].append(i)
@@ -105,11 +105,11 @@ def main(inputDir: str, outputDir: str):
     for file in files:
         print(file)
         output_path = os.path.splitext(os.path.basename(file))[0]
-        data = {}
-        with open(file, encoding="utf-8") as f:
-            data = json.load(f)
-        for content in data["contents"]:
-            for dat in content["datas"]:
+        f = open(file, "r", encoding="utf-8")
+        data = json.load(f)
+        for content in data["contents"]["fact_reason"]["sections"]:
+            if "texts" not in content:continue
+            for dat in content["texts"]:
                 times = extract_time(dat)
                 if len(times) != 0:
                     dat["event"] = {

@@ -21,19 +21,20 @@ def extract_main_people(dat):
     bnstについて、名詞と助詞のみで構成され、その助詞が「が」「は」「も」であり、is_rentaishiがfalse
     """
     res = []
-    for bnst in dat["bunsetsu"]:
+    for bnst in dat["bunsetu"]:
         if bnst.get("is_rentaishi", False) or bnst.get("person") is None:
             continue
         # if bnst.get("is_rentaishi", False):
         #    continue
-        for tango in bnst["tangos"]:
-            if tango["type1"] not in ["名詞", "助詞"]:
+        for tango in bnst["tokens"]:
+            tgs=tango["tag"].split("-")
+            if "名詞" not in tgs and "助詞" not in tgs:
                 continue
-            if tango["content"] in ["は", "が", "も"] and tango["type1"] == "助詞":
+            if tango["text"] in ["は", "が", "も"] and "助詞" in tgs:
                 res.append({
                     "id": bnst["id"],
                     "person": bnst["person"]["content"],
-                    "joshi": tango["content"]
+                    "joshi": tango["text"]
                 })
                 break  # 単語の精査を終了し、次の文節へ
     return res
@@ -46,11 +47,11 @@ def main(inputDir: str, outputDir: str):
         print(file)
         fileData = open(file, "r", encoding="utf-8")
         data = json.load(fileData)
-        contents = data["contents"]
-        for content in contents:
+        for content in data["contents"]["fact_reason"]["sections"]:
             # if len(content["texts"])>0:
             #    print(content["texts"][0])
-            for dat in content["datas"]:
+            if "texts" not in content:continue
+            for dat in content["texts"]:
                 people = extract_main_people(dat)
                 if len(people) != 0:
                     if dat.get("event") is not None:
