@@ -17,7 +17,7 @@ def is_meishi(tango):
     """
     tags=tango["tag"].split("-")
     #return "副詞可能" not in tags and ("名詞" in tags or "接尾辞" in tags or "接頭辞" in tags or "補助記号" in tags)
-    return ("名詞" in tags or "接尾辞" in tags or "接頭辞" in tags or "補助記号" in tags)
+    return ("句点" not in tags and "読点" not in tags) and ("名詞" in tags or "接尾辞" in tags or "接頭辞" in tags or "補助記号" in tags)
 
 
 def combine_tango(tangos):
