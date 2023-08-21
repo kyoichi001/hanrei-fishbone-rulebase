@@ -9,5 +9,7 @@ old/
 data/
 json/
 *_hanrei.json
+*_hanrei_*.json
 *_hanrei.csv
+*_hanrei_*.csv
 *_hanrei.txt
