@@ -74,21 +74,19 @@ def main(inputDir: str, outputDir: str):
         print(file)
         filedat = open(file, "r", encoding="utf-8")
         data = json.load(filedat)
-        for content in data["contents"]["fact_reason"]["sections"]:
-            if "texts" not in content:continue
-            for d in content["texts"]:
-                try:
-                    bnsts: List[Bunsetsu] = [Bunsetsu(
-                        bnst["id"],
-                        bnst["to"],
-                        [Tango(tango["text"], tango["tag"]) for tango in bnst["tokens"]]
-                    ) for bnst in d["bunsetu"]]
-                    b = check_rentaishi(bnsts)
-                    for bunsetsu in d["bunsetu"]:
-                        if b[bunsetsu["id"]]:
-                            bunsetsu["is_rentaishi"] = b[bunsetsu["id"]]
-                except RecursionError as e:
-                    print(d["bunsetu"])
+        for content in data["datas"]:
+            try:
+                bnsts: List[Bunsetsu] = [Bunsetsu(
+                    bnst["id"],
+                    bnst["to"],
+                    [Tango(tango["text"], tango["tag"]) for tango in bnst["tokens"]]
+                ) for bnst in content["bunsetsu"]]
+                b = check_rentaishi(bnsts)
+                for bunsetsu in content["bunsetsu"]:
+                    if b[bunsetsu["id"]]:
+                        bunsetsu["is_rentaishi"] = b[bunsetsu["id"]]
+            except RecursionError as e:
+                print(content["bunsetsu"])
 
         output_path = os.path.splitext(os.path.basename(file))[0]
         export_to_json(f"{outputDir}/{output_path}.json", data)

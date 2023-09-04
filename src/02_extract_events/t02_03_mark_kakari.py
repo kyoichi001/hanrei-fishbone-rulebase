@@ -54,16 +54,14 @@ def main(inputDir: str, outputDir: str):
         print(file)
         filedat = open(file, "r", encoding="utf-8")
         data = json.load(filedat)
-        for content in data["contents"]["fact_reason"]["sections"]:
-            if "texts" not in content:continue
-            for d in content["texts"]:
-                bnsts = d["bunsetu"]
-                tt, pp = check_rentaishi(bnsts)
-                for bunsetsu in d["bunsetu"]:
-                    if tt[bunsetsu["id"]]:
-                        bunsetsu["time_kakari"] = tt[bunsetsu["id"]]
-                    if pp[bunsetsu["id"]]:
-                        bunsetsu["person_kakari"] = pp[bunsetsu["id"]]
+        for content in data["datas"]:
+            bnsts = content["bunsetsu"]
+            tt, pp = check_rentaishi(bnsts)
+            for bunsetsu in content["bunsetsu"]:
+                if tt[bunsetsu["id"]]:
+                    bunsetsu["time_kakari"] = tt[bunsetsu["id"]]
+                if pp[bunsetsu["id"]]:
+                    bunsetsu["person_kakari"] = pp[bunsetsu["id"]]
         output_path = os.path.splitext(os.path.basename(file))[0]
         export_to_json(f"{outputDir}/{output_path}.json", data)
 

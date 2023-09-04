@@ -79,11 +79,9 @@ def main(inputDir: str, outputDir: str):
         print(file)
         dat = open(file, "r", encoding="utf-8")
         data = json.load(dat)
-        for content in data["contents"]["fact_reason"]["sections"]:
-            if "texts" not in content:continue
-            for c in content["texts"]:
-                newBsts = conbine_bunsetsu(c["bunsetu"])
-                c["bunsetu"] = newBsts
+        for content in data["datas"]:
+            newBsts = conbine_bunsetsu(content["bunsetsu"])
+            content["bunsetsu"] = newBsts
         output_path = os.path.splitext(os.path.basename(file))[0]
         export_to_json(f"{outputDir}/{output_path}.json", data)
 

@@ -63,14 +63,13 @@ def main(inputDir:str,outputDir:str):
         print(file)
         filedat = open(file, "r", encoding="utf-8")
         data=json.load(filedat)
-        contents =data["contents"]["fact_reason"]["sections"]
+        contents =data["datas"]
         for content in contents:
             if "texts" not in content:continue
             #if len(content["texts"])>0:
             #    print(content["texts"][0])
-            for dat in content["texts"]:
-                for bunsetsu in dat["bunsetu"]:
-                    bunsetsu=mark_person(rules,bunsetsu)
+            for bunsetsu in content["bunsetsu"]:
+                bunsetsu=mark_person(rules,bunsetsu)
         output_path=os.path.splitext(os.path.basename(file))[0]
         export_to_json(f"{outputDir}/{output_path}.json",data)
 

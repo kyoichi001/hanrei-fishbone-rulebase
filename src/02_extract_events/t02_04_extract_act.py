@@ -85,7 +85,7 @@ def extract_events_2(dat):
     extract_time_value=None
     acts: str = ""
     person = ""
-    for bnst in dat["bunsetu"]:
+    for bnst in dat["bunsetsu"]:
         if bnst.get("time_kakari", False) or bnst.get("person_kakari", False):
             continue  # 時間か人物に係る文節なら行動として抽出しない
         if bnst.get("is_rentaishi", False):  # 連体詞であれば、人物か時間かの判定をせず、行動に追加
@@ -157,31 +157,28 @@ def main(inputDir: str, outputDir: str):
         index = 0
         filedat = open(file, "r", encoding="utf-8")
         data = json.load(filedat)
-        for content in data["contents"]["fact_reason"]["sections"]:
-            if "texts" not in content:continue
+        for content in data["datas"]:
             tts = {}
-            for d in content["texts"]:
-                tts[d["text_id"]] = d["text"]
-            for dat in content["texts"]:
-                if dat.get("event") is None:
+            tts[content["text_id"]] = content["text"]
+            if content.get("event") is None:
+                continue
+            if content["event"].get("times") is None:
+                continue
+            ddd = extract_events_2(content)
+            if len(ddd) != 0:
+                content["events"] = ddd
+            for e in ddd:
+                if e["person"] == "" or e["time"] == "" or e["time"] is None or e["acts"] == "":
                     continue
-                if dat["event"].get("times") is None:
-                    continue
-                ddd = extract_events_2(dat)
-                if len(ddd) != 0:
-                    dat["events"] = ddd
-                for e in ddd:
-                    if e["person"] == "" or e["time"] == "" or e["time"] is None or e["acts"] == "":
-                        continue
-                    # print(e)
-                    csv_results.append([
-                        index,
-                        e["person"],
-                        e["time"],
-                        e["value"],
-                        e["acts"]
-                    ])
-                    index += 1
+                # print(e)
+                csv_results.append([
+                    index,
+                    e["person"],
+                    e["time"],
+                    e["value"],
+                    e["acts"]
+                ])
+                index += 1
         export_to_json(f"{outputDir}/{output_path}.json", data)
         export_events_to_csv(f"./p03/{output_path}.csv", csv_results)
 

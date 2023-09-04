@@ -125,24 +125,23 @@ def main(inputDir: str, outputDir: str):
     rule_data = json.load(rule_data)
     for file in files:
         print(file)
+        output_path = os.path.splitext(os.path.basename(file))[0]
         f = open(file, "r", encoding="utf-8")
+        os.makedirs(outputDir+"/times_"+output_path, exist_ok=True)
         data = json.load(f)
         befTime:Optional[Time] = None
-        for content in data["contents"]["fact_reason"]["sections"]:
-            if "texts" not in content:continue
-            for dat in content["texts"]:
-                for bunsetsu in dat["bunsetu"]:
-                    times, time = extract_times(
-                        rule_data, bunsetsu["tokens"], befTime)
-                    if time is not None:
-                        befTime = time
-                    if len(times) != 0:
-                        bunsetsu["times"] = times
-                    for t in times:
-                        csv_res.append([count, dat["text_id"], "".join(
-                            [tango["text"] for tango in bunsetsu["tokens"]]), t["text"], t.get("value")])
-                        count += 1
-        output_path = os.path.splitext(os.path.basename(file))[0]
+        for content in data["datas"]:
+            for bunsetsu in content["bunsetsu"]:
+                times, time = extract_times(
+                    rule_data, bunsetsu["tokens"], befTime)
+                if time is not None:
+                    befTime = time
+                if len(times) != 0:
+                    bunsetsu["times"] = times
+                for t in times:
+                    csv_res.append([count, content["text_id"], "".join(
+                        [tango["text"] for tango in bunsetsu["tokens"]]), t["text"], t.get("value")])
+                    count += 1
         export_to_json(f"{outputDir}/{output_path}.json", data)
     export_to_csv(f"{outputDir}/time_list.csv", csv_res)
 

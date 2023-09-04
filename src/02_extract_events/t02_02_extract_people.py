@@ -21,7 +21,7 @@ def extract_main_people(dat):
     bnstについて、名詞と助詞のみで構成され、その助詞が「が」「は」「も」であり、is_rentaishiがfalse
     """
     res = []
-    for bnst in dat["bunsetu"]:
+    for bnst in dat["bunsetsu"]:
         if bnst.get("is_rentaishi", False) or bnst.get("person") is None:
             continue
         # if bnst.get("is_rentaishi", False):
@@ -47,19 +47,17 @@ def main(inputDir: str, outputDir: str):
         print(file)
         fileData = open(file, "r", encoding="utf-8")
         data = json.load(fileData)
-        for content in data["contents"]["fact_reason"]["sections"]:
+        for content in data["datas"]:
             # if len(content["texts"])>0:
             #    print(content["texts"][0])
-            if "texts" not in content:continue
-            for dat in content["texts"]:
-                people = extract_main_people(dat)
-                if len(people) != 0:
-                    if dat.get("event") is not None:
-                        dat["event"]["people"] = people
-                    else:
-                        dat["event"] = {
-                            "people": people
-                        }
+            people = extract_main_people(content)
+            if len(people) != 0:
+                if content.get("event") is not None:
+                    content["event"]["people"] = people
+                else:
+                    content["event"] = {
+                        "people": people
+                    }
         output_path = os.path.splitext(os.path.basename(file))[0]
         export_to_json(f"{outputDir}/{output_path}.json", data)
 
