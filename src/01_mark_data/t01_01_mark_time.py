@@ -12,7 +12,6 @@ from value.time import Time
 from typing import Optional
 from typing import List, Tuple, Dict, Set, Any
 
-
 def extract_point_time(rule, tango: str, befTime: Optional[Time]) -> Optional[Tuple[Time, str]]:
     regex = rule["regex"]
     same = rule.get("same")
@@ -52,14 +51,12 @@ def extract_point_time(rule, tango: str, befTime: Optional[Time]) -> Optional[Tu
             res.day = befTime.day
     return res, a.group()
 
-
 def extract_begin_time(rule, tango: str):
     regex = rule["regex"]
     a = re.search(regex, tango)
     if a is None:
         return None
     return a.group()
-
 
 def extract_end_time(rule, tango: str):
     regex = rule["regex"]
@@ -68,7 +65,6 @@ def extract_end_time(rule, tango: str):
         return None
     return a.group()
 
-
 def extract_other_time(rule, tango: str):
     regex = rule["regex"]
     a = re.search(regex, tango)
@@ -76,11 +72,9 @@ def extract_other_time(rule, tango: str):
         return None
     return a.group()
 
-
 def export_to_json(filepath, data):
     with open(filepath, 'w', encoding='utf8', newline='') as f:
         json.dump(data, f, ensure_ascii=False, indent=2)
-
 
 def export_to_csv(filepath, data):
     import csv
@@ -88,7 +82,6 @@ def export_to_csv(filepath, data):
         writer = csv.writer(f)
         for row in data:
             writer.writerow(row)
-
 
 def extract_times(rule, tangos: List[Any], befTime:Optional[Time]) -> Tuple[List, Optional[Time]]:
     res = []
@@ -115,7 +108,6 @@ def extract_times(rule, tangos: List[Any], befTime:Optional[Time]) -> Tuple[List
                 res.append({"type": "other", "text": obj})
     return res, time
 
-
 def main(inputDir: str, outputDir: str):
     os.makedirs(outputDir, exist_ok=True)
     files = glob.glob(f"{inputDir}/*.json")
@@ -124,6 +116,7 @@ def main(inputDir: str, outputDir: str):
     rule_data = open("./rules/time_rules.json", "r", encoding="utf-8")
     rule_data = json.load(rule_data)
     for file in files:
+        count_b=0
         print(file)
         output_path = os.path.splitext(os.path.basename(file))[0]
         f = open(file, "r", encoding="utf-8")
@@ -131,6 +124,7 @@ def main(inputDir: str, outputDir: str):
         data = json.load(f)
         befTime:Optional[Time] = None
         for content in data["datas"]:
+            flg=False
             for bunsetsu in content["bunsetsu"]:
                 times, time = extract_times(
                     rule_data, bunsetsu["tokens"], befTime)
@@ -138,10 +132,14 @@ def main(inputDir: str, outputDir: str):
                     befTime = time
                 if len(times) != 0:
                     bunsetsu["times"] = times
+                    flg=True
                 for t in times:
                     csv_res.append([count, content["text_id"], "".join(
                         [tango["text"] for tango in bunsetsu["tokens"]]), t["text"], t.get("value")])
                     count += 1
+            if flg:
+                export_to_json(f"{outputDir}/times_{output_path}/{str(count_b).zfill(4)}.json",content)
+                count_b+=1
         export_to_json(f"{outputDir}/{output_path}.json", data)
     export_to_csv(f"{outputDir}/time_list.csv", csv_res)
 

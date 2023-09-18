@@ -26,7 +26,7 @@ def export_to_json(filename:str,data)->None:
     with open(filename, 'w', encoding='utf8', newline='') as f:
         json.dump(data, f, ensure_ascii=False, indent=2)
 
-def mark_person(rules,bunsetsu):
+def mark_person(rules:List[Rule],bunsetsu):
     bnst=Bunsetsu(
             bunsetsu["id"],
             bunsetsu["to"],
@@ -65,7 +65,7 @@ def main(inputDir:str,outputDir:str):
         data=json.load(filedat)
         contents =data["datas"]
         for content in contents:
-            if "texts" not in content:continue
+            if "bunsetsu" not in content:continue
             #if len(content["texts"])>0:
             #    print(content["texts"][0])
             for bunsetsu in content["bunsetsu"]:

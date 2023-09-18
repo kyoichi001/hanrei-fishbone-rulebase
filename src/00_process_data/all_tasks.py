@@ -6,6 +6,6 @@ import t00_03_conbine_tango
 #t00_01_conbine_data.main("./data", "./01")
 # 使ってない
 print("=====================task 02=====================")
-t00_02_conbine_bunsetsu.main("./01", "./02")
+t00_02_conbine_bunsetsu.main("./data", "./02")
 print("=====================task 03=====================")
 t00_03_conbine_tango.main("./02", "./03")

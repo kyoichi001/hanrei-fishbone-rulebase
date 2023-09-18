@@ -72,7 +72,7 @@ def extract_events_2(dat):
         return False
     res = []
     extracts = False
-    for bnst in dat["bunsetu"]:
+    for bnst in dat["bunsetsu"]:
         if bnst.get("times") is None:
             continue
         for time in bnst["times"]:

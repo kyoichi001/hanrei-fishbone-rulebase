@@ -23,6 +23,8 @@ def export_to_json(filename:str,data)->None:
 """
 root がtime_groupをなすかどうか判定する
 time_groupをつくる場合、同じtime_groupの文節IDのリストを得る
+
+DFSで係り受けが隣接している時間表現をグループ化
 """
 def add_time_group_(root: int, g: Graph, group_list: List[List[int]], bnsts: List[Any]):
     def has_value(bnst:Any):
@@ -35,7 +37,7 @@ def add_time_group_(root: int, g: Graph, group_list: List[List[int]], bnsts: Lis
         group_list[root].append(root)
     for child in children:
         add_time_group_(child, g, group_list, bnsts)
-        if "times" in bnsts[root] and "times" in bnsts[child]:
+        if "times" in bnsts[root] and "times" in bnsts[child]: #係り先に時間があり、かつ自分にも時間があるならグループ化する
             if not has_value(bnsts[root]) and not has_value(bnsts[child]):continue
             print("!!!!!!!!!!!")
             group_list[root].extend(group_list[child])
