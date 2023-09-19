@@ -4,7 +4,7 @@ import t02_03_mark_kakari
 import t02_04_extract_act
 
 print("=====================task 01=====================")
-t02_01_extract_time.main("../01_mark_data/03", "./01")
+t02_01_extract_time.main("../01_mark_data/04", "./01")
 print("=====================task 02=====================")
 t02_02_extract_people.main("./01", "./02")
 print("=====================task 03=====================")

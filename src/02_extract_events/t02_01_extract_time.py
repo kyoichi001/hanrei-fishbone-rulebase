@@ -43,16 +43,20 @@ from typing import Optional
 from typing import List, Tuple, Dict, Set, Optional, Any
 from collections import deque
 
-def bnst2time(bnst):
+def bnst2time(bnst,event_time_id):
     res={
+        "event_time_id":event_time_id,
         "bnst_ids":[bnst["id"]]
     }
+    bnst["event_time_id"]=event_time_id
     mode="point"
+    has_value=False
     for time in reversed(bnst["times"]): #その文節に含まれる時間表現（「～日」「～まで」など）をすべて一つのイベントにまとめる
         if time["type"] == "point":
             if mode=="point" and "point" not in res:res[mode]={"text":"","value":0}
             res[mode]["text"] = time["text"]+res[mode]["text"]
             res[mode]["value"] = time["value"]
+            has_value=True
             mode = "point"
         elif time["type"] == "begin" and mode == "point": #「～から」という語句が含まれる場合、後に現れる時間をbegin_timeにする
             mode = "begin"
@@ -62,24 +66,30 @@ def bnst2time(bnst):
             res[mode]={"text":time["text"],"value":0}
         elif time["type"] == "other":
             pass
-    return res
+    return res,has_value
 
-def timegroup2time(bnsts,bnst_ids):
+def timegroup2time(bnsts,bnst_ids,event_time_id):
     res={
+        "event_time_id":event_time_id,
         "bnst_ids":bnst_ids
     }
+    has_value=False
     for bnst in bnsts:
         if bnst["id"] not in bnst_ids:continue
-        time_obj=bnst2time(bnst)
+        time_obj,has_value_=bnst2time(bnst,event_time_id)
+        bnst["event_time_id"]=event_time_id
+        if has_value_:has_value=True
+        else:continue
         if "begin" in time_obj:
             res["begin"]=time_obj["begin"]
         elif "end" in time_obj:
             res["end"]=time_obj["end"]
         elif "point" in time_obj:
             res["point"]=time_obj["point"]
-    return res
+        #if has_value_:has_value=True
+    return res,has_value
 
-def extract_time(dat: Any):
+def extract_time(dat: Any,event_time_id):
     res = []
     i = len(dat["bunsetsu"])-1
     visited=[False for i in range(len(dat["bunsetsu"]))]
@@ -89,17 +99,21 @@ def extract_time(dat: Any):
             i-=1
             continue
         if not bnst.get("is_rentaishi", False) and bnst.get("times") is not None:
-            # 連体詞でないかつtimesプロパティを持つなら、出力の文節idリストに追加し、抽出フラグを立てる
+            # 連体詞でないかつtimesプロパティを持つなら
             if "time_group" in bnst:
-                time_obj=timegroup2time(dat["bunsetsu"],bnst["time_group"])
+                time_obj,has_value=timegroup2time(dat["bunsetsu"],bnst["time_group"],event_time_id)
                 for j in bnst["time_group"]:visited[j]=True
-                res.append(time_obj)
+                if has_value:
+                    res.append(time_obj)
+                    event_time_id+=1
             else:
-                time_obj=bnst2time(bnst)
-                res.append(time_obj)
+                time_obj,has_value=bnst2time(bnst,event_time_id)
+                if has_value:
+                    res.append(time_obj)
+                    event_time_id+=1
         visited[i]=True
         i -= 1
-    return list(reversed(res))
+    return list(reversed(res)),event_time_id
 
 
 def export_to_json(filepath, data):
@@ -115,8 +129,9 @@ def main(inputDir: str, outputDir: str):
         output_path = os.path.splitext(os.path.basename(file))[0]
         f = open(file, "r", encoding="utf-8")
         data = json.load(f)
+        event_time_id=0
         for content in data["datas"]:
-            times = extract_time(content)
+            times,event_time_id = extract_time(content,event_time_id)
             if len(times) != 0:
                 content["event"] = {
                     "text_id": content["text_id"],

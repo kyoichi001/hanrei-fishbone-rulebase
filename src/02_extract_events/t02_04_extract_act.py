@@ -60,7 +60,8 @@ def extract_events(dat):
 
 def extract_events_2(dat):
     """
-
+    出来事の抽出
+    eventとしての時間が抽出され（t02_01）、主語が検出されている場合のみ処理
     """
     def is_shugo(bst):
         if bst.get("is_rentaishi", False) or bst.get("person") is None:
@@ -70,19 +71,17 @@ def extract_events_2(dat):
             if tango["text"] in ["は", "が", "も"] and "助詞" in tgs:
                 return True
         return False
+    def has_event_time(dat):
+        if "event" not in dat:return False
+        if "times" not in dat["event"] :return False
+        return len(dat["event"]["times"])>0
+    def get_event_time(dat,time_id):
+        for time in dat["event"]["times"]:
+            if time["event_time_id"]==time_id:return time
+        return None
     res = []
-    extracts = False
-    for bnst in dat["bunsetsu"]:
-        if bnst.get("times") is None:
-            continue
-        for time in bnst["times"]:
-            if time["type"] == "point":
-                extracts = True
-                break
-    if not extracts:
-        return []
+    if not has_event_time(dat): return []
     extract_time = None
-    extract_time_value=None
     acts: str = ""
     person = ""
     for bnst in dat["bunsetsu"]:
@@ -91,27 +90,20 @@ def extract_events_2(dat):
         if bnst.get("is_rentaishi", False):  # 連体詞であれば、人物か時間かの判定をせず、行動に追加
             acts += "".join([tango["text"] for tango in bnst["tokens"]])
             continue
-            pass
-        if bnst.get("times") is not None:
+        if bnst.get("event_time_id") is not None:
             t = None
             t_v=None
-            for time in bnst["times"]:
-                if time["type"] == "point" or time["type"] == "begin" or time["type"] == "end":
-                    t = "".join([t_obj["text"] for t_obj in bnst["times"]])
-                    t_v=time.get("value",None)
-                    break
-            if t is not None:  # 時間表現（値があるやつ）がくれば行動の抽出を終了
-                if extract_time is not None:  # すでにイベントを抽出していれば、抽出したイベントを出力に渡す
-                    res.append({
-                        "person": person,
-                        "time": extract_time,
-                        "value":extract_time_value,
-                        "acts": acts
-                    })
-                    acts = ""
-                    person = ""
-                extract_time = t
-                extract_time_value=t_v
+            time_obj=get_event_time(dat,bnst["event_time_id"])
+            if time_obj is None:continue
+            if extract_time is not None:  # すでにイベントを抽出していれば、抽出したイベントを出力に渡す
+                res.append({
+                    "person": person,
+                    "time": extract_time,
+                    "acts": acts
+                })
+                acts = ""
+                person = ""
+            extract_time = time_obj
             continue
         if bnst.get("person") is not None:  # 人物がくれば行動の抽出を終了
             if not is_shugo(bnst):  # 主語でない場合スルー
@@ -121,11 +113,9 @@ def extract_events_2(dat):
                 res.append({
                     "person": person,
                     "time": extract_time,
-                    "value":extract_time_value,
                     "acts": acts
                 })
                 extract_time = None
-                extract_time_value=None
                 acts = ""
             person = bnst["person"]["content"]
             continue
@@ -134,7 +124,6 @@ def extract_events_2(dat):
         res.append({
             "person": person,
             "time": extract_time,
-            "value":extract_time_value,
             "acts": acts
         })
     return res
@@ -174,8 +163,9 @@ def main(inputDir: str, outputDir: str):
                 csv_results.append([
                     index,
                     e["person"],
-                    e["time"],
-                    e["value"],
+                    e["time"].get("begin"),
+                    e["time"].get("end"),
+                    e["time"].get("point"),
                     e["acts"]
                 ])
                 index += 1
