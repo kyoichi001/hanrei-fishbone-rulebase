@@ -140,12 +140,14 @@ def main(inputDir: str, outputDir: str):
     os.makedirs(outputDir, exist_ok=True)
     files = glob.glob(f"{inputDir}/*.json")
     for file in files:
-        csv_results:list[list[Union[int,str]]] = [["id",  "person", "time", "act"]]
+        csv_results:list[list[Union[int,str]]] = [["id",  "person", "begin_time","begin_value","end_time","end_value","point_time","point_value",  "act"]]
         print(file)
         output_path = os.path.splitext(os.path.basename(file))[0]
+        os.makedirs(outputDir+"/events_"+output_path, exist_ok=True)
         index = 0
         filedat = open(file, "r", encoding="utf-8")
         data = json.load(filedat)
+        events_json:list[Any]=[]
         for content in data["datas"]:
             tts = {}
             tts[content["text_id"]] = content["text"]
@@ -163,12 +165,18 @@ def main(inputDir: str, outputDir: str):
                 csv_results.append([
                     index,
                     e["person"],
-                    e["time"].get("begin"),
-                    e["time"].get("end"),
-                    e["time"].get("point"),
+                    e["time"].get("begin",{}).get("text"),
+                    e["time"].get("begin",{}).get("value"),
+                    e["time"].get("end",{}).get("text"),
+                    e["time"].get("end",{}).get("value"),
+                    e["time"].get("point",{}).get("text"),
+                    e["time"].get("point",{}).get("value"),
                     e["acts"]
                 ])
                 index += 1
+                events_json.append({
+                    
+                })
         export_to_json(f"{outputDir}/{output_path}.json", data)
         export_events_to_csv(f"./p03/{output_path}.csv", csv_results)
 
