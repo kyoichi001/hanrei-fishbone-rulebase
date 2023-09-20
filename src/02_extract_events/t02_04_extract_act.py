@@ -135,15 +135,16 @@ def export_events_to_csv(output_path, csv_datas):
         for d in csv_datas:
             writer.writerow(d)
 
+import copy
 
 def main(inputDir: str, outputDir: str):
     os.makedirs(outputDir, exist_ok=True)
     files = glob.glob(f"{inputDir}/*.json")
+    os.makedirs(outputDir+"/events", exist_ok=True)
     for file in files:
         csv_results:list[list[Union[int,str]]] = [["id",  "person", "begin_time","begin_value","end_time","end_value","point_time","point_value",  "act"]]
         print(file)
         output_path = os.path.splitext(os.path.basename(file))[0]
-        os.makedirs(outputDir+"/events_"+output_path, exist_ok=True)
         index = 0
         filedat = open(file, "r", encoding="utf-8")
         data = json.load(filedat)
@@ -174,10 +175,12 @@ def main(inputDir: str, outputDir: str):
                     e["acts"]
                 ])
                 index += 1
-                events_json.append({
-                    
-                })
+                c=copy.deepcopy(content)
+                for kkk in c["bunsetsu"]:
+                    del kkk["tokens"]
+                events_json.append(c)
         export_to_json(f"{outputDir}/{output_path}.json", data)
+        export_to_json(f"{outputDir}/events/{output_path}.json", events_json)
         export_events_to_csv(f"./p03/{output_path}.csv", csv_results)
 
 
