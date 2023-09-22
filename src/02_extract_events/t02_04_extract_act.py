@@ -142,13 +142,13 @@ def main(inputDir: str, outputDir: str):
     files = glob.glob(f"{inputDir}/*.json")
     os.makedirs(outputDir+"/events", exist_ok=True)
     for file in files:
+        event_count=0
         csv_results:list[list[Union[int,str]]] = [["id",  "person", "begin_time","begin_value","end_time","end_value","point_time","point_value",  "act"]]
         print(file)
         output_path = os.path.splitext(os.path.basename(file))[0]
         index = 0
         filedat = open(file, "r", encoding="utf-8")
         data = json.load(filedat)
-        events_json:list[Any]=[]
         for content in data["datas"]:
             tts = {}
             tts[content["text_id"]] = content["text"]
@@ -178,9 +178,9 @@ def main(inputDir: str, outputDir: str):
                 c=copy.deepcopy(content)
                 for kkk in c["bunsetsu"]:
                     del kkk["tokens"]
-                events_json.append(c)
+                export_to_json(f"{outputDir}/events/{output_path}_{event_count}.json", c)
+                event_count+=1
         export_to_json(f"{outputDir}/{output_path}.json", data)
-        export_to_json(f"{outputDir}/events/{output_path}.json", events_json)
         export_events_to_csv(f"./p03/{output_path}.csv", csv_results)
 
 

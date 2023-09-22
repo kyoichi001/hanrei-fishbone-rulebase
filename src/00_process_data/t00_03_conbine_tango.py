@@ -27,12 +27,19 @@ def combine_tango(tangos):
         if index+1 >= len(tangos):
             break
         if is_meishi(tangos[index]) and is_meishi(tangos[index+1]):
+            selif=None
+            if "selif" in tangos[index]:
+                selif=tangos[index]["selif"]
+            elif "selif" in tangos[index+1]:
+                selif=tangos[index+1]["selif"]
             tangos[index] = {
                 "text": tangos[index]["text"]+tangos[index+1]["text"],
                 "tag": "名詞",
 #                "start_char": tangos[index]["start_char"],
 #                "end_char": tangos[index+1]["end_char"],
             }
+            if selif is not None:
+                tangos[index]["selif"]=selif
             del tangos[index+1]
         else:
             index += 1
