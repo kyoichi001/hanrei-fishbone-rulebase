@@ -178,6 +178,7 @@ def main(inputDir: str, outputDir: str):
                 c=copy.deepcopy(content)
                 for kkk in c["bunsetsu"]:
                     del kkk["tokens"]
+                del c["event"]
                 export_to_json(f"{outputDir}/events/{output_path}_{event_count}.json", c)
                 event_count+=1
         export_to_json(f"{outputDir}/{output_path}.json", data)
