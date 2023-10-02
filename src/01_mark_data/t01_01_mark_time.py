@@ -108,15 +108,30 @@ def extract_times(rule, tangos: List[Any], befTime:Optional[Time]) -> Tuple[List
                 res.append({"type": "other", "text": obj})
     return res, time
 
+def export_debug(data,outputDir:str,output_path:str):
+    csv_res:List[Any] = [["id", "text_id", "bunsetsu", "text", "value"]]
+    count = 0
+    count_b=0
+    for content in data["datas"]:
+        flg=False
+        for bunsetsu in content["bunsetsu"]:
+            if "times" not in bunsetsu:continue
+            flg=True
+            for t in bunsetsu["times"]:
+                csv_res.append([count, content["text_id"], "".join(
+                    [tango["text"] for tango in bunsetsu["tokens"]]), t["text"], t.get("value")])
+                count += 1
+        if flg:
+            export_to_json(f"{outputDir}/times_{output_path}/{str(count_b).zfill(4)}.json",content)
+            count_b+=1
+    export_to_csv(f"{outputDir}/{output_path}_time_list.csv", csv_res)
+
 def main(inputDir: str, outputDir: str):
     os.makedirs(outputDir, exist_ok=True)
     files = glob.glob(f"{inputDir}/*.json")
-    csv_res:List[Any] = [["id", "text_id", "bunsetsu", "text", "value"]]
-    count = 0
     rule_data = open("./rules/time_rules.json", "r", encoding="utf-8")
     rule_data = json.load(rule_data)
     for file in files:
-        count_b=0
         print(file)
         output_path = os.path.splitext(os.path.basename(file))[0]
         f = open(file, "r", encoding="utf-8")
@@ -124,24 +139,14 @@ def main(inputDir: str, outputDir: str):
         data = json.load(f)
         befTime:Optional[Time] = None
         for content in data["datas"]:
-            flg=False
             for bunsetsu in content["bunsetsu"]:
-                times, time = extract_times(
-                    rule_data, bunsetsu["tokens"], befTime)
+                times, time = extract_times(rule_data, bunsetsu["tokens"], befTime)
                 if time is not None:
                     befTime = time
                 if len(times) != 0:
                     bunsetsu["times"] = times
-                    flg=True
-                for t in times:
-                    csv_res.append([count, content["text_id"], "".join(
-                        [tango["text"] for tango in bunsetsu["tokens"]]), t["text"], t.get("value")])
-                    count += 1
-            if flg:
-                export_to_json(f"{outputDir}/times_{output_path}/{str(count_b).zfill(4)}.json",content)
-                count_b+=1
+        export_debug(data,outputDir,output_path)
         export_to_json(f"{outputDir}/{output_path}.json", data)
-    export_to_csv(f"{outputDir}/time_list.csv", csv_res)
 
 
 if __name__ == "__main__":
