@@ -17,14 +17,34 @@ def mark_verb(dat):
             if tango["text"] in ["は", "が", "も"] and "助詞" in tango["tag"].split("-"):
                 return True
         return False
-    def get_verb(bst):
+    def get_joshi(bst):
+        res=""
+        for tango in bst["tokens"]:
+            if "助詞" in tango["tag"].split("-"):
+                res+=(tango["text"])
+            elif res!="":return res #もし途中で助詞が途切れたらそこまでの助詞を返す
+        return res
+    def is_shugo_normal(bst):
+        is_meishi=False
+        for tango in bst["tokens"]:
+            if "名詞" in tango["tag"].split("-"):is_meishi=True
+            if is_meishi and get_joshi(bst) in ["は", "が", "も"]:
+                return True
+        return False
+    def get_verb(bst)->Optional[int]:
         for tango in bst["tokens"]:
             if "動詞" in tango["tag"].split("-"):return bst["id"]
         return None
+    def get_kakari(dat,target_index:int)->List[int]: #文節に直接係る文節を取得
+        res:List[int]=[]
+        for bnst in dat["bunsetsu"]:
+            if bnst["id"]>=target_index:return res
+            if bnst["to"]==target_index:res.append(bnst["id"])
+        return res
     person=None
     for bnst in dat["bunsetsu"]:
         if bnst.get("is_rentaishi", False): continue
-        if get_verb(bnst)and person is not None:
+        if get_verb(bnst) is not None and person is not None:
             bnst["verb_person"]=person
         if bnst.get("person") is not None:  # 人物がくれば行動の抽出を終了
             if not is_shugo(bnst):continue
@@ -33,6 +53,17 @@ def mark_verb(dat):
                 "id":bnst["id"],
                 "str":bnst["person"]["content"]
             }
+
+    for bnst in dat["bunsetsu"]:
+        if get_verb(bnst) is not None:
+            r=get_kakari(dat,bnst["id"])
+            for a in r:
+                if is_shugo_normal(dat["bunsetsu"][a]):
+                    if "kakari_people" not in bnst:bnst["kakari_people"]=[]
+                    bnst["kakari_people"].append({
+                        "id":dat["bunsetsu"][a]["id"],
+                        "str":dat["bunsetsu"][a]["text"]
+                    })
 
 def export_to_json(filename: str, data) -> None:
     with open(filename, 'w', encoding='utf8', newline='') as f:
@@ -61,6 +92,7 @@ def export_debug(data,outputDir,output_path):
         if "event"in c:del c["event"]
         export_to_json(f"{outputDir}/debug/{output_path}_{count}.json", c)
         count+=1
+    
     
 
 def main(inputDir: str, outputDir: str):
