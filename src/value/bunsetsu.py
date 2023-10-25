@@ -1,8 +1,8 @@
 
 from typing import List, Tuple, Dict, Set, Any
 import re
-from event import Event
-from graph import Graph
+from .event import Event
+from .graph import Graph
 from typing import List, Tuple, Dict, Set,Optional
 
 class TimeAttribute:
