@@ -15,11 +15,6 @@ from value.bunsetsu import Bunsetsu,Tango,Sentence
 from value.event import Event
 from value.graph import Graph
 
-def export_to_json(filename:str,data)->None:
-    with open(filename, 'w', encoding='utf8', newline='') as f:
-        json.dump(data, f, ensure_ascii=False, indent=2)
-
-
 """
 root がtime_groupをなすかどうか判定する
 time_groupをつくる場合、同じtime_groupの文節IDのリストを得る
@@ -55,20 +50,10 @@ def add_time_group(bsts:list[Any]):
         if len(group_list[bnst["id"]])>1:
             bnst["time_group"] = group_list[bnst["id"]]
 
-def main(inputDir:str,outputDir:str):
-    os.makedirs(outputDir, exist_ok=True)
-    files = glob.glob(f"{inputDir}/*.json")
-    for file in files:
-        print(file)
-        filedat = open(file, "r", encoding="utf-8")
-        data=json.load(filedat)
-        contents =data["datas"]
-        for content in contents:
-            #if len(content["texts"])>0:
-            #    print(content["texts"][0])
-            add_time_group(content["bunsetsu"])
-        output_path=os.path.splitext(os.path.basename(file))[0]
-        export_to_json(f"{outputDir}/{output_path}.json",data)
-
-if __name__=="__main__":
-    main("./03","./04")
+def main(data):
+    contents =data["datas"]
+    for content in contents:
+        #if len(content["texts"])>0:
+        #    print(content["texts"][0])
+        add_time_group(content["bunsetsu"])
+    return data

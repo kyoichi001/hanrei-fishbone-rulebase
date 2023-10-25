@@ -22,10 +22,6 @@ def match_rule(tango:Tango,rule:Rule)->bool:
     if rule.types=="regex": return re.fullmatch(rule.content,tango.content) is not None #正規表現
     return True
 
-def export_to_json(filename:str,data)->None:
-    with open(filename, 'w', encoding='utf8', newline='') as f:
-        json.dump(data, f, ensure_ascii=False, indent=2)
-
 def mark_person(rules:List[Rule],bunsetsu):
     bnst=Bunsetsu(
             bunsetsu["id"],
@@ -54,24 +50,13 @@ def mark_person(rules:List[Rule],bunsetsu):
         }
     return bunsetsu
 
-
-def main(inputDir:str,outputDir:str):
-    os.makedirs(outputDir, exist_ok=True)
-    files = glob.glob(f"{inputDir}/*.json")
+def main(data):
     rules=load_rules("./rules/rule.json")
-    for file in files:
-        print(file)
-        filedat = open(file, "r", encoding="utf-8")
-        data=json.load(filedat)
-        contents =data["datas"]
-        for content in contents:
-            if "bunsetsu" not in content:continue
-            #if len(content["texts"])>0:
-            #    print(content["texts"][0])
-            for bunsetsu in content["bunsetsu"]:
-                bunsetsu=mark_person(rules,bunsetsu)
-        output_path=os.path.splitext(os.path.basename(file))[0]
-        export_to_json(f"{outputDir}/{output_path}.json",data)
-
-if __name__=="__main__":
-    main("./02","./03")
+    contents =data["datas"]
+    for content in contents:
+        if "bunsetsu" not in content:continue
+        #if len(content["texts"])>0:
+        #    print(content["texts"][0])
+        for bunsetsu in content["bunsetsu"]:
+            bunsetsu=mark_person(rules,bunsetsu)
+    return data

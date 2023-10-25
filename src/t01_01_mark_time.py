@@ -126,28 +126,15 @@ def export_debug(data,outputDir:str,output_path:str):
             count_b+=1
     export_to_csv(f"{outputDir}/{output_path}_time_list.csv", csv_res)
 
-def main(inputDir: str, outputDir: str):
-    os.makedirs(outputDir, exist_ok=True)
-    files = glob.glob(f"{inputDir}/*.json")
+def main(data):
     rule_data = open("./rules/time_rules.json", "r", encoding="utf-8")
     rule_data = json.load(rule_data)
-    for file in files:
-        print(file)
-        output_path = os.path.splitext(os.path.basename(file))[0]
-        f = open(file, "r", encoding="utf-8")
-        os.makedirs(outputDir+"/times_"+output_path, exist_ok=True)
-        data = json.load(f)
-        befTime:Optional[Time] = None
-        for content in data["datas"]:
-            for bunsetsu in content["bunsetsu"]:
-                times, time = extract_times(rule_data, bunsetsu["tokens"], befTime)
-                if time is not None:
-                    befTime = time
-                if len(times) != 0:
-                    bunsetsu["times"] = times
-        export_debug(data,outputDir,output_path)
-        export_to_json(f"{outputDir}/{output_path}.json", data)
-
-
-if __name__ == "__main__":
-    main("../00_process_data/03", "./01")
+    befTime:Optional[Time] = None
+    for content in data["datas"]:
+        for bunsetsu in content["bunsetsu"]:
+            times, time = extract_times(rule_data, bunsetsu["tokens"], befTime)
+            if time is not None:
+                befTime = time
+            if len(times) != 0:
+                bunsetsu["times"] = times
+    return data

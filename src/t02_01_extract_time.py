@@ -115,30 +115,14 @@ def extract_time(dat: Any,event_time_id):
         i -= 1
     return list(reversed(res)),event_time_id
 
+def main(data):
+    event_time_id=0
+    for content in data["datas"]:
+        times,event_time_id = extract_time(content,event_time_id)
+        if len(times) != 0:
+            content["event"] = {
+                "text_id": content["text_id"],
+                "times": times
+            }
+    return data
 
-def export_to_json(filepath, data):
-    with open(filepath, 'w', encoding='utf8', newline='') as f:
-        json.dump(data, f, ensure_ascii=False, indent=2)
-
-
-def main(inputDir: str, outputDir: str):
-    os.makedirs(outputDir, exist_ok=True)
-    files = glob.glob(f"{inputDir}/*.json")
-    for file in files:
-        print(file)
-        output_path = os.path.splitext(os.path.basename(file))[0]
-        f = open(file, "r", encoding="utf-8")
-        data = json.load(f)
-        event_time_id=0
-        for content in data["datas"]:
-            times,event_time_id = extract_time(content,event_time_id)
-            if len(times) != 0:
-                content["event"] = {
-                    "text_id": content["text_id"],
-                    "times": times
-                }
-        export_to_json(f"{outputDir}/{output_path}.json", data)
-
-
-if __name__ == "__main__":
-    main("../01_mark_data/04", "01")

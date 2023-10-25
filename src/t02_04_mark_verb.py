@@ -93,20 +93,7 @@ def export_debug(data,outputDir,output_path):
         export_to_json(f"{outputDir}/debug/{output_path}_{count}.json", c)
         count+=1
     
-    
-
-def main(inputDir: str, outputDir: str):
-    os.makedirs(outputDir, exist_ok=True)
-    files = glob.glob(f"{inputDir}/*.json")
-    for file in files:
-        print(file)
-        filedat = open(file, "r", encoding="utf-8")
-        data = json.load(filedat)
-        for content in data["datas"]:
-            mark_verb(content)
-        output_path = os.path.splitext(os.path.basename(file))[0]
-        export_debug(data,outputDir,output_path)
-        export_to_json(f"{outputDir}/{output_path}.json", data)
-
-if __name__ == "__main__":
-    main("./03", "./04")
+def main(data):
+    for content in data["datas"]:
+        mark_verb(content)
+    return data

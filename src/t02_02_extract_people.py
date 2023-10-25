@@ -9,12 +9,6 @@ import json
 from re import T
 from typing import List, Tuple, Dict, Set, Optional
 
-
-def export_to_json(filename: str, data) -> None:
-    with open(filename, 'w', encoding='utf8', newline='') as f:
-        json.dump(data, f, ensure_ascii=False, indent=2)
-
-
 def extract_main_people(dat):
     """
     文から主語を抜き取る
@@ -39,28 +33,16 @@ def extract_main_people(dat):
                 break  # 単語の精査を終了し、次の文節へ
     return res
 
-
-def main(inputDir: str, outputDir: str):
-    os.makedirs(outputDir, exist_ok=True)
-    files = glob.glob(f"{inputDir}/*.json")
-    for file in files:
-        print(file)
-        fileData = open(file, "r", encoding="utf-8")
-        data = json.load(fileData)
-        for content in data["datas"]:
-            # if len(content["texts"])>0:
-            #    print(content["texts"][0])
-            people = extract_main_people(content)
-            if len(people) != 0:
-                if content.get("event") is not None:
-                    content["event"]["people"] = people
-                else:
-                    content["event"] = {
-                        "people": people
-                    }
-        output_path = os.path.splitext(os.path.basename(file))[0]
-        export_to_json(f"{outputDir}/{output_path}.json", data)
-
-
-if __name__ == "__main__":
-    main("./01", "./02")
+def main(data):
+    for content in data["datas"]:
+        # if len(content["texts"])>0:
+        #    print(content["texts"][0])
+        people = extract_main_people(content)
+        if len(people) != 0:
+            if content.get("event") is not None:
+                content["event"]["people"] = people
+            else:
+                content["event"] = {
+                    "people": people
+                }
+    return data

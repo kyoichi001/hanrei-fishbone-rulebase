@@ -127,23 +127,10 @@ def export_debug(data,outputDir:str,output_path:str)->None:
             event_count+=1
     export_to_csv(f"./p03/{output_path}.csv", csv_results)
 
-def main(inputDir: str, outputDir: str):
-    os.makedirs(outputDir, exist_ok=True)
-    files = glob.glob(f"{inputDir}/*.json")
-    os.makedirs(outputDir+"/events", exist_ok=True)
-    for file in files:
-        print(file)
-        output_path = os.path.splitext(os.path.basename(file))[0]
-        filedat = open(file, "r", encoding="utf-8")
-        data = json.load(filedat)
-        for content in data["datas"]:
-            if content.get("event",{}).get("times") is None: continue
-            ddd = extract_events_2(content)
-            if len(ddd) != 0:
-                content["events"] = ddd
-        export_debug(data,outputDir,output_path)
-        export_to_json(f"{outputDir}/{output_path}.json", data)
-
-
-if __name__ == "__main__":
-    main("./04", "./05")
+def main(data):
+    for content in data["datas"]:
+        if content.get("event",{}).get("times") is None: continue
+        ddd = extract_events_2(content)
+        if len(ddd) != 0:
+            content["events"] = ddd
+    return data

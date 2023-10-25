@@ -17,11 +17,6 @@ from typing import List, Tuple, Dict, Set, Optional
 from value.bunsetsu import Bunsetsu, Tango
 from value.graph import Graph
 
-def export_to_json(filename: str, data) -> None:
-    with open(filename, 'w', encoding='utf8', newline='') as f:
-        json.dump(data, f, ensure_ascii=False, indent=2)
-
-
 def check_rentaishi_(root: int, g: Graph, flagList: List[bool], bnsts: List[Bunsetsu]):
     def is_meishi(bunsetsu: Bunsetsu):
         for tango in bunsetsu.tangos:
@@ -66,31 +61,18 @@ def check_rentaishi(bnsts: List[Bunsetsu]) -> List[bool]:
         bnst.is_rentaishi = flagList[bnst.id]
     return flagList
 
-
-def main(inputDir: str, outputDir: str):
-    os.makedirs(outputDir, exist_ok=True)
-    files = glob.glob(f"{inputDir}/*.json")
-    for file in files:
-        print(file)
-        filedat = open(file, "r", encoding="utf-8")
-        data = json.load(filedat)
-        for content in data["datas"]:
-            try:
-                bnsts: List[Bunsetsu] = [Bunsetsu(
-                    bnst["id"],
-                    bnst["to"],
-                    [Tango(tango["text"], tango["tag"]) for tango in bnst["tokens"]]
-                ) for bnst in content["bunsetsu"]]
-                b = check_rentaishi(bnsts)
-                for bunsetsu in content["bunsetsu"]:
-                    if b[bunsetsu["id"]]:
-                        bunsetsu["is_rentaishi"] = b[bunsetsu["id"]]
-            except RecursionError as e:
-                print(content["bunsetsu"])
-
-        output_path = os.path.splitext(os.path.basename(file))[0]
-        export_to_json(f"{outputDir}/{output_path}.json", data)
-
-
-if __name__ == "__main__":
-    main("./01", "./02")
+def main(data):
+    for content in data["datas"]:
+        try:
+            bnsts: List[Bunsetsu] = [Bunsetsu(
+                bnst["id"],
+                bnst["to"],
+                [Tango(tango["text"], tango["tag"]) for tango in bnst["tokens"]]
+            ) for bnst in content["bunsetsu"]]
+            b = check_rentaishi(bnsts)
+            for bunsetsu in content["bunsetsu"]:
+                if b[bunsetsu["id"]]:
+                    bunsetsu["is_rentaishi"] = b[bunsetsu["id"]]
+        except RecursionError as e:
+            print(content["bunsetsu"])
+    return data

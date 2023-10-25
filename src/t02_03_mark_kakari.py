@@ -41,30 +41,13 @@ def check_rentaishi(bnsts) -> Tuple[List[bool],List[bool]]:
     check_rentaishi_(bnsts[-1]["id"], g, timeflagList, personflagList, bnsts)
     return timeflagList, personflagList
 
-
-def export_to_json(filename: str, data) -> None:
-    with open(filename, 'w', encoding='utf8', newline='') as f:
-        json.dump(data, f, ensure_ascii=False, indent=2)
-
-
-def main(inputDir: str, outputDir: str):
-    os.makedirs(outputDir, exist_ok=True)
-    files = glob.glob(f"{inputDir}/*.json")
-    for file in files:
-        print(file)
-        filedat = open(file, "r", encoding="utf-8")
-        data = json.load(filedat)
-        for content in data["datas"]:
-            bnsts = content["bunsetsu"]
-            tt, pp = check_rentaishi(bnsts)
-            for bunsetsu in content["bunsetsu"]:
-                if tt[bunsetsu["id"]]:
-                    bunsetsu["time_kakari"] = tt[bunsetsu["id"]]
-                if pp[bunsetsu["id"]]:
-                    bunsetsu["person_kakari"] = pp[bunsetsu["id"]]
-        output_path = os.path.splitext(os.path.basename(file))[0]
-        export_to_json(f"{outputDir}/{output_path}.json", data)
-
-
-if __name__ == "__main__":
-    main("./02", "./03")
+def main(data):
+    for content in data["datas"]:
+        bnsts = content["bunsetsu"]
+        tt, pp = check_rentaishi(bnsts)
+        for bunsetsu in content["bunsetsu"]:
+            if tt[bunsetsu["id"]]:
+                bunsetsu["time_kakari"] = tt[bunsetsu["id"]]
+            if pp[bunsetsu["id"]]:
+                bunsetsu["person_kakari"] = pp[bunsetsu["id"]]
+    return data
