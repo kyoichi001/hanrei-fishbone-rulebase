@@ -62,6 +62,7 @@ def check_rentaishi(bnsts: List[Bunsetsu]) -> List[bool]:
     return flagList
 
 def main(data):
+    import sys
     for content in data["datas"]:
         try:
             bnsts: List[Bunsetsu] = [Bunsetsu(
@@ -74,5 +75,5 @@ def main(data):
                 if b[bunsetsu["id"]]:
                     bunsetsu["is_rentaishi"] = b[bunsetsu["id"]]
         except RecursionError as e:
-            print(content["bunsetsu"])
+            print(content["bunsetsu"],file=sys.stderr)
     return data

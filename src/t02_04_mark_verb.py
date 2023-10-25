@@ -48,7 +48,6 @@ def mark_verb(dat):
             bnst["verb_person"]=person
         if bnst.get("person") is not None:  # 人物がくれば行動の抽出を終了
             if not is_shugo(bnst):continue
-            print(bnst["person"])
             person={
                 "id":bnst["id"],
                 "str":bnst["person"]["content"]

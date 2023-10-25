@@ -28,13 +28,11 @@ def add_time_group_(root: int, g: Graph, group_list: List[List[int]], bnsts: Lis
         return False
     children = g.g[root]
     if "times" in bnsts[root]:
-        print("!!!!!!!!!!!")
         group_list[root].append(root)
     for child in children:
         add_time_group_(child, g, group_list, bnsts)
         if "times" in bnsts[root] and "times" in bnsts[child]: #係り先に時間があり、かつ自分にも時間があるならグループ化する
             if not has_value(bnsts[root]) and not has_value(bnsts[child]):continue
-            print("!!!!!!!!!!!")
             group_list[root].extend(group_list[child])
 
 def add_time_group(bsts:list[Any]):
@@ -44,7 +42,6 @@ def add_time_group(bsts:list[Any]):
         if bnst["to"] != -1:
             li[bnst["to"]].append(bnst["id"])
     g = Graph(li)
-    print(bsts[0])
     add_time_group_(bsts[-1]["id"], g, group_list, bsts)
     for bnst in bsts:
         if len(group_list[bnst["id"]])>1:

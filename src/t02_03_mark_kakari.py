@@ -17,7 +17,6 @@ from value.graph import Graph
 
 def check_rentaishi_(root: int, g: Graph, timeflagList: List[bool], personflagList: List[bool],  bnsts: List[Any]):
     children = g.g[root]
-    # print(bnsts[root])
     if personflagList[root] or bnsts[root].get("person") is not None:
         for child in children:
             personflagList[child] = True
