@@ -13,3 +13,7 @@ json/
 *_hanrei.csv
 *_hanrei_*.csv
 *_hanrei.txt
+*.spec
+*.exe
+build/
+dist/

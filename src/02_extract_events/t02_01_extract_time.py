@@ -48,7 +48,6 @@ def bnst2time(bnst,event_time_id):
         "event_time_id":event_time_id,
         "bnst_ids":[bnst["id"]]
     }
-    bnst["event_time_id"]=event_time_id
     mode="point"
     has_value=False
     for time in reversed(bnst["times"]): #その文節に含まれる時間表現（「～日」「～まで」など）をすべて一つのイベントにまとめる
@@ -66,6 +65,7 @@ def bnst2time(bnst,event_time_id):
             res[mode]={"text":time["text"],"value":0}
         elif time["type"] == "other":
             pass
+    if has_value:bnst["event_time_id"]=event_time_id
     return res,has_value
 
 def timegroup2time(bnsts,bnst_ids,event_time_id):

@@ -40,14 +40,20 @@ def extract_point_time(rule, tango: str, befTime: Optional[Time]) -> Optional[Tu
     if day_str is not None:
         res.day = int(day_str)
     if same is not None and befTime is not None:
-        res.year = befTime.year
-        res.month = befTime.month
-        res.day = befTime.day
         if same == "year":
             res.year = befTime.year
+            if month_str is not None:
+                res.month = int(month_str)
+            if day_str is not None:
+                res.day = int(day_str)
         elif same == "month":
+            res.year = befTime.year
             res.month = befTime.month
+            if day_str is not None:
+                res.day = int(day_str)
         elif same == "day":
+            res.year = befTime.year
+            res.year = befTime.year
             res.day = befTime.day
     return res, a.group()
 

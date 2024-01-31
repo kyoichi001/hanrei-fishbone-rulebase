@@ -43,6 +43,7 @@ def extract_events_2(dat):
     extract_time = None
     acts: str = ""
     person = ""
+    person_kakari_verb=None
     last_verb=None
     for bnst in dat["bunsetsu"]:
         # 時間か人物に係る文節なら行動として抽出しない
@@ -50,10 +51,12 @@ def extract_events_2(dat):
         if bnst.get("is_rentaishi", False):  # 連体詞であれば、人物か時間かの判定をせず、行動に追加
             acts += "".join([tango["text"] for tango in bnst["tokens"]])
             continue
-        if bnst.get("event_time_id") is not None:
+        if bnst.get("event_time_id") is not None:#時間に係る文節に来たら終了
             time_obj=get_event_time(dat,bnst["event_time_id"])
             if time_obj is None:continue
             if extract_time is not None:  # すでにイベントを抽出していれば、抽出したイベントを出力に渡す
+                if person_kakari_verb is not None and bnst["id"]<person_kakari_verb:continue#人物に直接係る動詞までは絶対抽出
+                print(bnst["id"],person_kakari_verb,acts)
                 res.append({
                     "person": person,
                     "time": extract_time,
@@ -62,12 +65,14 @@ def extract_events_2(dat):
                 acts = ""
                 person = ""
                 last_verb=None
+                person_kakari_verb=None
             extract_time = time_obj
             continue
         if bnst.get("person") is not None:  # 人物がくれば行動の抽出を終了
             if not is_shugo(bnst):  # 主語でない場合や主語の後動詞がないまま人物が来た場合スルー
                 acts += "".join([tango["text"] for tango in bnst["tokens"]])
                 continue
+            if (person_kakari_verb is not None) and bnst["id"]<person_kakari_verb:continue#人物に直接係る動詞までは絶対抽出
             if person != "":  # すでに人物を抽出していれば、抽出したイベントを出力に渡す
                 res.append({
                     "person": person,
@@ -77,7 +82,9 @@ def extract_events_2(dat):
                 extract_time = None
                 acts = ""
                 last_verb=None
+                person_kakari_verb=None
             person = bnst["person"]["content"]
+            person_kakari_verb=bnst["to"]
             continue
         v=get_verb(bnst)
         if v is not None: last_verb=v
@@ -88,6 +95,7 @@ def extract_events_2(dat):
             "time": extract_time,
             "acts": acts
         })
+    print(res)
     return res
 
 def export_to_csv(output_path, csv_datas):

@@ -42,35 +42,37 @@ def to_csv(file:str):
     data={}
     with open(file,encoding="utf-8") as f:
         data=json.load(f)
-    res=[["id","text","person","time","time_value","act"]]
+    res=[["id","text","person","point","point_value","begin","begin_value","end","end_value","act"]]
     id=0
-    for content in data["contents"]:
-        id2text={}
-        for text in content["texts"]:
-            id2text[text["text_id"]]=text["text"]
-        for selif in content["selifs"]:
-            id2text[selif["text_id"]]=selif["content"]
-        for blacket in content["blackets"]:
-            id2text[blacket["text_id"]]=blacket["content"]
-        for dat in content["datas"]:
-            for event in dat["events"]:
-                d=[
-                    id,
-                    id2text[dat["text_id"]],#TODO text_idに合わせてテキスト本文を取得（text, selif, blacketsそれぞれ対応）
-                    event["person"]["text"],
-                    event["time"]["text"],
-                    event["time"]["value"],
-                    "".join(event["act"]["texts"]),
-                ]
-                res.append(d)
-                id+=1
+    for content in data["datas"]:
+        if "events" not in content:continue
+        for event in content["events"]:
+            #if "time" not in event or event.get("time") is None:continue
+            time=event.get("time")
+            if time is None:time={}
+            #if "person" not in event or event.get("person") is None or event["person"]=="":continue
+            print(type(event),event["time"])
+            d=[
+                id,
+                content["text"],#TODO text_idに合わせてテキスト本文を取得（text, selif, blacketsそれぞれ対応）
+                event["person"],
+                time.get("point",{}).get("text",None),
+                time.get("point",{}).get("value",None),
+                time.get("begin",{}).get("text",None),
+                time.get("begin",{}).get("value",None),
+                time.get("end",{}).get("text",None),
+                time.get("end",{}).get("value",None),
+                event["acts"],
+            ]
+            res.append(d)
+            id+=1
     with open(f"./p03/{output_path}.csv","w",encoding="utf-8",newline="") as f:
         writer = csv.writer(f)
         for d in res:
             writer.writerow(d)
             
 os.makedirs("p03", exist_ok=True)
-files = glob.glob("./03/*.json")
+files = glob.glob("./05/*.json")
 for file in files:
     print(file)
     to_csv(file)

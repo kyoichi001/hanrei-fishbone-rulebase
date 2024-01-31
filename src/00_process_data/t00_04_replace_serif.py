@@ -25,10 +25,14 @@ def main(inputDir: str, outputDir: str):
         data = json.load(dat)
         for content in data["datas"]:
             for bunsetsu in content["bunsetsu"]:
+                has_selif=False
                 for token in bunsetsu["tokens"]:
                     if "selif" not in token:continue
                     token["text"]=token["text"].replace("セリフ",token["selif"])
                     del token["selif"]
+                    has_selif=True
+                if has_selif:
+                    bunsetsu["text"]="".join([token["text"] for token in bunsetsu["tokens"]])
         output_path = os.path.splitext(os.path.basename(file))[0]
         export_to_json(f"{outputDir}/{output_path}.json", data)
 
